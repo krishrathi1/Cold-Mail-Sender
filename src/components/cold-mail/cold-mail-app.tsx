@@ -168,6 +168,8 @@ export default function ColdMailApp() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [settingsSaving, setSettingsSaving] = useState(false);
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [smtpTesting, setSmtpTesting] = useState(false);
   const [batchSize, setBatchSize] = useState("10");
   const [intervalMinutes, setIntervalMinutes] = useState("5");
   const [addForm, setAddForm] = useState({ name: "", email: "", title: "", company: "" });
@@ -261,6 +263,11 @@ export default function ColdMailApp() {
   const companyBarData = Object.entries(companyCountsMap)
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  const recentActivities = store.contacts
+    .filter((c) => ["sent", "failed", "generating"].includes(c.status))
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 5);
 
   // Selection handlers
@@ -478,6 +485,86 @@ export default function ColdMailApp() {
       toast({ title: "Save failed", description: e.message, variant: "destructive" });
     } finally {
       setSettingsSaving(false);
+    }
+  };
+
+  // Test SMTP Connection
+  const handleTestSmtp = async () => {
+    if (!store.config?.emailUser || !store.config?.emailPass) {
+      toast({
+        title: "Missing fields",
+        description: "Please enter both Gmail address and App Password before testing.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setSmtpTesting(true);
+    store.addLog("Testing SMTP Connection...", "info");
+    try {
+      const res = await fetch("/api/config/test-smtp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailUser: store.config.emailUser,
+          emailPass: store.config.emailPass
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to verify SMTP");
+      
+      store.addLog("SMTP Connection verified successfully!", "success");
+      toast({
+        title: "Connection Success",
+        description: "Your Gmail SMTP credentials are valid and active!"
+      });
+    } catch (e: any) {
+      store.addLog(`SMTP Connection test failed: ${e.message}`, "error");
+      toast({
+        title: "Verification failed",
+        description: e.message,
+        variant: "destructive"
+      });
+    } finally {
+      setSmtpTesting(false);
+    }
+  };
+
+  // Send Test Email to Yourself
+  const handleSendTestEmail = async () => {
+    if (!store.previewContact) return;
+    
+    if (!store.config?.emailUser || !store.config?.emailPass) {
+      toast({
+        title: "Missing credentials",
+        description: "Please configure SMTP settings in the Settings tab before sending emails.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSendingTest(true);
+    store.addLog(`Sending test email for ${store.previewContact.name}...`, "info");
+    try {
+      const result = await api.sendEmail(
+        store.previewContact.id,
+        store.previewSubject,
+        store.previewBody,
+        true // isTest = true
+      );
+      store.addLog(`Test email successfully sent. Message ID: ${result.messageId}`, "success");
+      toast({
+        title: "Test email sent!",
+        description: `Successfully dispatched to ${store.config.candidateEmail || store.config.emailUser}.`
+      });
+    } catch (e: any) {
+      store.addLog(`Failed to send test email: ${e.message}`, "error");
+      toast({
+        title: "Test failed",
+        description: e.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsSendingTest(false);
     }
   };
 
@@ -859,9 +946,9 @@ export default function ColdMailApp() {
 
             {/* Campaign Visual Analytics */}
             {mounted && totalContacts > 0 && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Stats charts */}
-                <Card className="glass-panel shadow-sm col-span-2">
+                <Card className="glass-panel shadow-sm">
                   <CardHeader>
                     <CardTitle className="text-sm font-bold text-slate-800 dark:text-slate-200">Company outreach volumes</CardTitle>
                     <CardDescription className="text-muted-foreground">Top companies targeted by target contacts count</CardDescription>
@@ -934,6 +1021,73 @@ export default function ColdMailApp() {
                         </div>
                       ))}
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Activity Feed */}
+                <Card className="glass-panel shadow-sm flex flex-col justify-between">
+                  <CardHeader>
+                    <CardTitle className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <Terminal className="w-4 h-4 text-primary" />
+                      Live Outreach Activity
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">Real-time status updates of the campaign</CardDescription>
+                  </CardHeader>
+                  <CardContent className="h-64 overflow-y-auto pr-1">
+                    {recentActivities.length > 0 ? (
+                      <div className="space-y-4">
+                        {recentActivities.map((act) => (
+                          <div key={act.id} className="flex gap-3 text-xs leading-normal">
+                            <div className="flex flex-col items-center shrink-0">
+                              <div
+                                className={`w-6 h-6 rounded-full flex items-center justify-center border ${
+                                  act.status === "sent"
+                                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500 dark:text-emerald-400"
+                                    : act.status === "failed"
+                                    ? "bg-red-500/10 border-red-500/30 text-red-500 dark:text-red-400"
+                                    : "bg-blue-500/10 border-blue-500/30 text-blue-500 dark:text-blue-400 animate-pulse"
+                                }`}
+                              >
+                                {act.status === "sent" ? (
+                                  <Send className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                                ) : act.status === "failed" ? (
+                                  <XCircle className="w-3 h-3 text-red-500" />
+                                ) : (
+                                  <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
+                                )}
+                              </div>
+                              <div className="w-0.5 flex-1 bg-border/60 min-h-[16px] last:hidden mt-2" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                                  {act.name}
+                                </span>
+                                <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 font-medium">
+                                  {new Date(act.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                {act.company ? `${act.company} · ` : ""}{act.title || "HR Target"}
+                              </p>
+                              {act.status === "failed" && act.error && (
+                                <p className="text-[10px] text-red-550 dark:text-red-400/90 font-mono mt-1 bg-red-500/5 p-1.5 rounded border border-red-500/10 max-h-12 overflow-y-auto">
+                                  {act.error}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center text-center text-slate-550 dark:text-slate-400 gap-2 pb-6">
+                        <Clock className="w-8 h-8 text-slate-350 dark:text-slate-650 animate-pulse" />
+                        <div>
+                          <p className="font-semibold text-xs text-slate-700 dark:text-slate-300">No outreach activity yet</p>
+                          <p className="text-[10px] max-w-[200px] mt-0.5 leading-normal">Trigger the autonomous sending agent to view live status feeds here.</p>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -1473,6 +1627,27 @@ export default function ColdMailApp() {
                       <strong className="text-slate-650 dark:text-slate-305">Note:</strong> Uses <code>gemini-3-flash-preview</code>. If left blank, it will automatically fall back to the key defined in your root <code>config.json</code> file.
                     </p>
                   </div>
+                  <div className="pt-2">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      className="w-full border-border hover:bg-secondary text-slate-700 dark:text-slate-205 font-bold rounded-xl h-9 text-xs"
+                      onClick={handleTestSmtp}
+                      disabled={smtpTesting}
+                    >
+                      {smtpTesting ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
+                          Verifying SMTP credentials...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-3.5 h-3.5 mr-2 text-amber-500" />
+                          Test SMTP Connection
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -1818,15 +1993,33 @@ export default function ColdMailApp() {
             <Button
               variant="outline"
               onClick={store.closePreview}
-              disabled={store.isSending}
-              className="border-border hover:bg-secondary text-slate-600 dark:text-slate-300"
+              disabled={store.isSending || isSendingTest}
+              className="border-border hover:bg-secondary text-slate-650 dark:text-slate-350"
             >
               Cancel
             </Button>
             <Button
+              variant="outline"
+              className="border-primary/20 hover:bg-primary/5 text-primary dark:text-primary/90 font-bold px-4"
+              onClick={handleSendTestEmail}
+              disabled={store.isGenerating || store.isSending || isSendingTest}
+            >
+              {isSendingTest ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                  Sending test...
+                </>
+              ) : (
+                <>
+                  <Eye className="w-3.5 h-3.5 mr-1.5" />
+                  Send Test to Me
+                </>
+              )}
+            </Button>
+            <Button
               className="bg-primary hover:bg-primary/90 text-white font-bold px-5"
               onClick={handleSendEmail}
-              disabled={store.isGenerating || store.isSending}
+              disabled={store.isGenerating || store.isSending || isSendingTest}
             >
               {store.isSending ? (
                 <>

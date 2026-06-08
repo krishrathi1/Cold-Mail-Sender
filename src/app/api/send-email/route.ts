@@ -6,7 +6,7 @@ import path from 'path';
 
 export async function POST(request: Request) {
   try {
-    const { hrContactId, subject, body } = await request.json();
+    const { hrContactId, subject, body, isTest } = await request.json();
 
     if (!hrContactId || !subject || !body) {
       return NextResponse.json(
@@ -44,10 +44,13 @@ export async function POST(request: Request) {
     const resumePath = path.join(process.cwd(), 'public', 'resume.pdf');
     const hasResume = existsSync(resumePath);
 
+    const recipient = isTest ? (config.candidateEmail || config.emailUser) : hrContact.email;
+    const finalSubject = isTest ? `[TEST] ${subject}` : subject;
+
     const mailOptions: nodemailer.SendMailOptions = {
       from: `"${config.candidateName}" <${config.emailUser}>`,
-      to: hrContact.email,
-      subject,
+      to: recipient,
+      subject: finalSubject,
       text: body,
       attachments: hasResume
         ? [{ filename: 'resume.pdf', path: resumePath }]
@@ -57,18 +60,20 @@ export async function POST(request: Request) {
     try {
       const info = await transporter.sendMail(mailOptions);
 
-      // Update HR contact on success
-      await db.hrContact.update({
-        where: { id: hrContactId },
-        data: {
-          status: 'sent',
-          subject,
-          body,
-          sentAt: new Date(),
-          messageId: info.messageId,
-          error: null,
-        },
-      });
+      if (!isTest) {
+        // Update HR contact on success
+        await db.hrContact.update({
+          where: { id: hrContactId },
+          data: {
+            status: 'sent',
+            subject,
+            body,
+            sentAt: new Date(),
+            messageId: info.messageId,
+            error: null,
+          },
+        });
+      }
 
       return NextResponse.json({
         success: true,
@@ -78,16 +83,18 @@ export async function POST(request: Request) {
       const errorMessage =
         sendError instanceof Error ? sendError.message : 'Failed to send email';
 
-      // Update HR contact on failure
-      await db.hrContact.update({
-        where: { id: hrContactId },
-        data: {
-          status: 'failed',
-          subject,
-          body,
-          error: errorMessage,
-        },
-      });
+      if (!isTest) {
+        // Update HR contact on failure
+        await db.hrContact.update({
+          where: { id: hrContactId },
+          data: {
+            status: 'failed',
+            subject,
+            body,
+            error: errorMessage,
+          },
+        });
+      }
 
       return NextResponse.json(
         { error: errorMessage },
