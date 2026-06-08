@@ -105,7 +105,7 @@ export async function POST(request: Request) {
     const skillsStr = skills.length > 0 ? skills.join(', ') : 'Not specified';
     const highlightsStr = highlights.length > 0 ? highlights.map((h, i) => `${i + 1}. ${h}`).join('\n') : 'Not specified';
 
-    const systemPrompt = `You are a professional cold email writer. You write highly personalized cold emails for job seekers reaching out to HR professionals.
+    let systemPrompt = `You are a professional cold email writer. You write highly personalized cold emails for job seekers reaching out to HR professionals.
 Your goal is to write a tailored email for a specific company. You must:
 1. Research or infer what the company does, its domain, or a key interest related to the company.
 2. Write a clear, professional sentence or phrase showing you know what the company does or expressing genuine interest in their space.
@@ -117,7 +117,7 @@ Your goal is to write a tailored email for a specific company. You must:
 
     // Check if we are refining an existing draft
     if (feedback && hrContact.subject && hrContact.body) {
-      userPrompt = `You are asked to refine a previously generated cold email draft based on feedback from the candidate. Make sure the email remains personalized and details what the company (${hrContact.company}) does, relating it to the candidate's achievements/skills.
+      userPrompt = `You are asked to refine a previously generated email draft based on feedback from the candidate.
 
 ORIGINAL DRAFT:
 Subject: ${hrContact.subject}
@@ -145,15 +145,58 @@ HR RECIPIENT:
 - Company: ${hrContact.company}
 - Email: ${hrContact.email}
 
+${hrContact.replyBody ? `RECEIVED HR REPLY (that you are replying to):\n${hrContact.replyBody}\n` : ''}
 ${config.customInstructions ? `CANDIDATE WRITING PREFERENCES / INSTRUCTIONS:\n${config.customInstructions}\n` : ''}
 REQUIREMENTS:
 1. Revise the original subject line and email body to incorporate the candidate's feedback.
 2. Keep the email professional, polite, and under 120 words.
 3. Make sure to maintain the key information but adjust the tone or details as requested by the feedback.
-4. Keep the company relevance and candidate-relationship connection.
-5. Return ONLY a valid JSON object with "subject" and "body" fields.
+4. Return ONLY a valid JSON object with "subject" and "body" fields.
 
 Return ONLY the JSON object, nothing else.`;
+    } else if (hrContact.status === 'replied' && hrContact.replyBody) {
+      // Draft follow-up email in response to a reply
+      systemPrompt = `You are a professional assistant. You draft follow-up replies to email responses from HR professionals and recruiters.
+Your goal is to write a highly professional, context-aware email response. You must:
+1. Address the recipient by name.
+2. Read the HR representative's reply message and answer any questions they asked or acknowledge their statements professionally.
+3. If they asked to coordinate a call or schedule an interview, state that you are available and suggest some standard professional options (or reference candidate availability).
+4. Maintain a polite, enthusiastic, yet professional tone.
+5. Keep the email concise, natural, and under 100 words.
+6. Return ONLY a valid JSON object with "subject" and "body" fields. No markdown outside of the JSON block, no explanation, just the JSON object itself.`;
+
+      userPrompt = `Write a professional follow-up response email to an HR professional.
+
+CANDIDATE INFO (YOU):
+- Name: ${config.candidateName}
+- Email: ${config.candidateEmail}
+- Phone: ${config.candidatePhone}
+- LinkedIn: ${config.candidateLinkedin}
+- GitHub: ${config.candidateGithub}
+
+HR RECIPIENT:
+- Name: ${hrContact.name}
+- Title: ${hrContact.title}
+- Company: ${hrContact.company}
+- Email: ${hrContact.email}
+
+ORIGINAL OUTREACH EMAIL SENT BY YOU:
+Subject: ${hrContact.subject}
+Body:
+${hrContact.body}
+
+RECEIVED REPLY FROM THE HR REPRESENTATIVE:
+Subject: ${hrContact.replySubject || 'Re: Outreach'}
+Date Received: ${hrContact.repliedAt ? new Date(hrContact.repliedAt).toLocaleDateString() : 'Recent'}
+Content:
+${hrContact.replyBody}
+
+${config.customInstructions ? `CANDIDATE WRITING PREFERENCES / INSTRUCTIONS:\n${config.customInstructions}\n` : ''}
+REQUIREMENTS:
+1. Subject line: Write a suitable reply subject (e.g. "Re: " followed by original subject, or continuing the thread).
+2. Acknowledge and address the HR representative's specific message (e.g. if they asked for times, suggest availability).
+3. Under 100 words.
+4. Return ONLY a valid JSON object with "subject" and "body" fields. No other output.`;
     } else {
       userPrompt = `Write a personalized cold email from a candidate to an HR professional.
 You must research or infer details about the target company (${hrContact.company}) based on its name and industry, and write a professional line about what they do or a recent trend in their domain.

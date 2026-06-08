@@ -114,3 +114,19 @@ export async function uploadResume(file: File): Promise<void> {
   });
   if (!res.ok) throw new Error("Failed to upload resume");
 }
+
+export async function checkReplies(): Promise<{
+  success: boolean;
+  checked: number;
+  replied: number;
+  repliedList: string[];
+  message: string;
+}> {
+  const res = await fetch(`${API_BASE}/hr-list/check-replies`);
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || "Failed to check replies");
+  }
+  return res.json();
+}
+

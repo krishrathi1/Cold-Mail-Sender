@@ -71,6 +71,7 @@ import {
   Building,
   Sun,
   Moon,
+  Reply,
 } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
@@ -182,6 +183,7 @@ export default function ColdMailApp() {
   // AI refinement state
   const [aiFeedback, setAiFeedback] = useState("");
   const [isRefining, setIsRefining] = useState(false);
+  const [isCheckingReplies, setIsCheckingReplies] = useState(false);
 
   // SSR protection for Recharts
   const [mounted, setMounted] = useState(false);
@@ -208,6 +210,36 @@ export default function ColdMailApp() {
       store.addLog(`Error loading data: ${e.message}`, "error");
     } finally {
       store.setIsLoading(false);
+    }
+  };
+
+  const handleCheckReplies = async () => {
+    setIsCheckingReplies(true);
+    store.addLog("Checking for new email replies via IMAP...", "info");
+    try {
+      const res = await api.checkReplies();
+      store.addLog(res.message, res.replied > 0 ? "success" : "info");
+      if (res.replied > 0) {
+        toast({
+          title: "New replies detected!",
+          description: `${res.replied} candidate replies tracked and updated to 'replied' status.`,
+        });
+        await refreshContacts();
+      } else {
+        toast({
+          title: "Check replies complete",
+          description: "No new replies detected from sent contacts.",
+        });
+      }
+    } catch (e: any) {
+      store.addLog(`Failed to check replies: ${e.message}`, "error");
+      toast({
+        title: "Reply check failed",
+        description: e.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsCheckingReplies(false);
     }
   };
 
@@ -242,11 +274,13 @@ export default function ColdMailApp() {
   const failedCount = store.contacts.filter((c) => c.status === "failed").length;
   const pendingCount = store.contacts.filter((c) => c.status === "pending").length;
   const generatingCount = store.contacts.filter((c) => c.status === "generating").length;
-  const successRate = totalContacts > 0 ? Math.round((sentCount / (sentCount + failedCount || 1)) * 100) : 0;
+  const repliedCount = store.contacts.filter((c) => c.status === "replied").length;
+  const successRate = totalContacts > 0 ? Math.round(((sentCount + repliedCount) / (sentCount + repliedCount + failedCount || 1)) * 100) : 0;
 
   // Recharts Pie Chart Data (Theme-aware distribution chart)
   const chartData = [
     { name: "Sent", value: sentCount, color: "#10b981" },
+    { name: "Replied", value: repliedCount, color: "#6366f1" },
     { name: "Pending", value: pendingCount, color: "#f59e0b" },
     { name: "Failed", value: failedCount, color: "#ef4444" },
     { name: "Generating", value: generatingCount, color: "#3b82f6" },
@@ -266,7 +300,7 @@ export default function ColdMailApp() {
     .slice(0, 5);
 
   const recentActivities = store.contacts
-    .filter((c) => ["sent", "failed", "generating"].includes(c.status))
+    .filter((c) => ["sent", "failed", "generating", "replied"].includes(c.status))
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 5);
 
@@ -291,9 +325,21 @@ export default function ColdMailApp() {
   // Preview email
   const handlePreviewEmail = async (contact: HrContact) => {
     setAiFeedback(""); // Reset refinement input
-    store.openPreview(contact, "Generating...", "AI is crafting a personalized cold email... Please wait.");
+    const isReply = contact.status === "replied";
+    store.openPreview(
+      contact,
+      "Generating...",
+      isReply
+        ? "AI is drafting a personalized follow-up in response to the HR representative... Please wait."
+        : "AI is crafting a personalized cold email... Please wait."
+    );
     store.setIsGenerating(true);
-    store.addLog(`Generating email draft for ${contact.name} at ${contact.company}...`, "info");
+    store.addLog(
+      isReply
+        ? `Generating follow-up draft for ${contact.name} at ${contact.company} in response to their reply...`
+        : `Generating email draft for ${contact.name} at ${contact.company}...`,
+      "info"
+    );
 
     try {
       const email = await api.generateEmail(contact.id);
@@ -740,6 +786,7 @@ export default function ColdMailApp() {
       generated: { className: "border-violet-500/20 text-violet-600 dark:text-violet-400 bg-violet-500/5", icon: <FileText className="w-3 h-3 mr-1" /> },
       sending: { className: "border-cyan-500/20 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5", icon: <Loader2 className="w-3 h-3 mr-1 animate-spin" /> },
       sent: { className: "border-emerald-500/20 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 glow-emerald", icon: <CheckCircle2 className="w-3 h-3 mr-1" /> },
+      replied: { className: "border-indigo-500/20 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 glow-indigo", icon: <Reply className="w-3.5 h-3.5 mr-1" /> },
       failed: { className: "border-red-500/20 text-red-650 dark:text-red-400 bg-red-500/5", icon: <XCircle className="w-3 h-3 mr-1" /> },
     };
     const config = variants[status] || variants.pending;
@@ -789,6 +836,25 @@ export default function ColdMailApp() {
                 <Bot className={`w-3.5 h-3.5 ${store.isAgentRunning ? "text-emerald-400 animate-spin" : "text-slate-400"}`} />
                 <span className="font-semibold text-slate-700 dark:text-slate-200">{store.isAgentRunning ? "Agent Engine Active" : "Agent Engine Idle"}</span>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-indigo-500/20 hover:bg-indigo-505/5 text-indigo-600 dark:text-indigo-400 font-bold px-3 py-1.5 rounded-xl h-8 flex items-center gap-1.5"
+                onClick={handleCheckReplies}
+                disabled={isCheckingReplies}
+              >
+                {isCheckingReplies ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Checking...</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Check Replies</span>
+                  </>
+                )}
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -862,7 +928,7 @@ export default function ColdMailApp() {
             )}
 
             {/* Stats Cards Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <motion.div whileHover={{ y: -3 }} className="h-full">
                 <Card className="glass-panel glass-panel-hover overflow-hidden h-full flex flex-col justify-between">
                   <div className="h-0.5 bg-blue-500 w-full" />
@@ -891,6 +957,22 @@ export default function ColdMailApp() {
                     </div>
                     <h2 className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">{sentCount}</h2>
                     <p className="text-[9px] text-emerald-600/80 dark:text-emerald-400 mt-1">Successfully delivered</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div whileHover={{ y: -3 }} className="h-full">
+                <Card className="glass-panel glass-panel-hover overflow-hidden h-full flex flex-col justify-between">
+                  <div className="h-0.5 bg-indigo-500 w-full" />
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Replies</p>
+                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500 dark:text-indigo-400 border border-indigo-500/20">
+                        <Reply className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <h2 className="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-2">{repliedCount}</h2>
+                    <p className="text-[9px] text-indigo-600/80 dark:text-indigo-400 mt-1">HR replies tracked</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -1055,6 +1137,8 @@ export default function ColdMailApp() {
                                 className={`w-6 h-6 rounded-full flex items-center justify-center border ${
                                   act.status === "sent"
                                     ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500 dark:text-emerald-400"
+                                    : act.status === "replied"
+                                    ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-500 dark:text-indigo-400"
                                     : act.status === "failed"
                                     ? "bg-red-500/10 border-red-500/30 text-red-500 dark:text-red-400"
                                     : "bg-blue-500/10 border-blue-500/30 text-blue-500 dark:text-blue-400 animate-pulse"
@@ -1062,6 +1146,8 @@ export default function ColdMailApp() {
                               >
                                 {act.status === "sent" ? (
                                   <Send className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                                ) : act.status === "replied" ? (
+                                  <Reply className="w-3 h-3 text-indigo-605 dark:text-indigo-400" />
                                 ) : act.status === "failed" ? (
                                   <XCircle className="w-3 h-3 text-red-500" />
                                 ) : (
@@ -1170,6 +1256,7 @@ export default function ColdMailApp() {
                       <SelectItem value="generating">Generating</SelectItem>
                       <SelectItem value="generated">Generated Draft</SelectItem>
                       <SelectItem value="sent">Sent</SelectItem>
+                      <SelectItem value="replied">Replied</SelectItem>
                       <SelectItem value="failed">Failed</SelectItem>
                     </SelectContent>
                   </Select>
@@ -1284,6 +1371,17 @@ export default function ColdMailApp() {
                                     <span>Review</span>
                                   </Button>
                                 )}
+                                {contact.status === "replied" && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-indigo-650 dark:text-indigo-400 hover:text-white dark:hover:text-slate-900 hover:bg-indigo-600 dark:hover:bg-indigo-400 h-8 font-semibold text-xs rounded-lg border border-indigo-500/25 animate-pulse"
+                                    onClick={() => handlePreviewEmail(contact)}
+                                  >
+                                    <Reply className="w-3.5 h-3.5 mr-1" />
+                                    <span>Follow-up</span>
+                                  </Button>
+                                )}
                                 {(contact.status === "sent" || contact.status === "failed") && (
                                   <Button
                                     variant="ghost"
@@ -1316,6 +1414,12 @@ export default function ColdMailApp() {
                                       <DropdownMenuItem onClick={() => handlePreviewEmail(contact)} className="hover:bg-secondary text-foreground">
                                         <Sparkles className="w-4 h-4 mr-2 text-primary" />
                                         AI Generate
+                                      </DropdownMenuItem>
+                                    )}
+                                    {contact.status === "replied" && (
+                                      <DropdownMenuItem onClick={() => handlePreviewEmail(contact)} className="hover:bg-secondary text-foreground">
+                                        <Sparkles className="w-4 h-4 mr-2 text-indigo-500" />
+                                        Draft Follow-up
                                       </DropdownMenuItem>
                                     )}
                                     <DropdownMenuItem
@@ -1940,8 +2044,15 @@ export default function ColdMailApp() {
         <DialogContent className="sm:max-w-3xl max-h-[95vh] overflow-y-auto rounded-2xl bg-card border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-lg">
-              <Mail className="w-5 h-5 text-primary" />
-              {store.isGenerating ? "AI Generative Agent drafting..." : "Email Draft Review"}
+              {store.previewContact?.status === "replied" ? (
+                <Reply className="w-5 h-5 text-indigo-505 animate-pulse" />
+              ) : (
+                <Mail className="w-5 h-5 text-primary" />
+              )}
+              {store.isGenerating 
+                ? (store.previewContact?.status === "replied" ? "AI Follow-up drafting..." : "AI Generative Agent drafting...") 
+                : (store.previewContact?.status === "replied" ? "Follow-up Draft Review" : "Email Draft Review")
+              }
             </DialogTitle>
             <DialogDescription className="font-semibold text-slate-450 dark:text-slate-400">
               {store.previewContact
@@ -1951,6 +2062,24 @@ export default function ColdMailApp() {
           </DialogHeader>
 
           <div className="space-y-4 pt-3">
+            {store.previewContact?.replyBody && (
+              <div className="border border-indigo-500/20 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-xl p-4 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-indigo-650 dark:text-indigo-400 font-bold text-xs">
+                    <Reply className="w-3.5 h-3.5" />
+                    <span>Received HR Response from {store.previewContact.name}</span>
+                  </div>
+                  {store.previewContact.repliedAt && (
+                    <span className="text-[10px] text-indigo-600/80 dark:text-indigo-400/80 font-mono font-semibold">
+                      {new Date(store.previewContact.repliedAt).toLocaleString()}
+                    </span>
+                  )}
+                </div>
+                <div className="bg-card border border-indigo-500/10 rounded-lg p-3 max-h-40 overflow-y-auto text-xs leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans">
+                  {store.previewContact.replyBody}
+                </div>
+              </div>
+            )}
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-slate-500 dark:text-slate-400">Subject</Label>
               <Input
@@ -2031,7 +2160,7 @@ export default function ColdMailApp() {
               )}
             </Button>
             <Button
-              className="bg-primary hover:bg-primary/90 text-white font-bold px-5"
+              className="bg-primary hover:bg-primary/95 text-white font-bold px-5"
               onClick={handleSendEmail}
               disabled={store.isGenerating || store.isSending || isSendingTest}
             >
@@ -2043,7 +2172,7 @@ export default function ColdMailApp() {
               ) : (
                 <>
                   <Send className="w-4 h-4 mr-1.5" />
-                  Send Email
+                  {store.previewContact?.status === "replied" ? "Send Follow-up" : "Send Email"}
                 </>
               )}
             </Button>

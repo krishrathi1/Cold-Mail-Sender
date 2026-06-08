@@ -4,12 +4,15 @@ export interface HrContact {
   email: string;
   title: string;
   company: string;
-  status: "pending" | "generating" | "generated" | "sending" | "sent" | "failed";
+  status: "pending" | "generating" | "generated" | "sending" | "sent" | "failed" | "replied";
   subject?: string | null;
   body?: string | null;
   sentAt?: string | null;
   error?: string | null;
   messageId?: string | null;
+  replyBody?: string | null;
+  replySubject?: string | null;
+  repliedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }

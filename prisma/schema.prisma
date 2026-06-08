@@ -26,17 +26,20 @@ model AppConfig {
 }
 
 model HrContact {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  title     String   @default("")
-  company   String   @default("")
-  status    String   @default("pending")
-  subject   String?
-  body      String?
-  sentAt    DateTime?
-  error     String?
-  messageId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String
+  email        String
+  title        String   @default("")
+  company      String   @default("")
+  status       String   @default("pending")
+  subject      String?
+  body         String?
+  sentAt       DateTime?
+  error        String?
+  messageId    String?
+  replyBody    String?
+  replySubject String?
+  repliedAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
