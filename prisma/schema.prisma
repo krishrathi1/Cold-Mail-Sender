@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AppConfig {
+  id                  String @id @default("default")
+  emailUser           String @default("")
+  emailPass           String @default("")
+  candidateName       String @default("")
+  candidateEmail      String @default("")
+  candidatePhone      String @default("")
+  candidateLinkedin   String @default("")
+  candidateGithub     String @default("")
+  candidateCollege    String @default("")
+  candidateDegree     String @default("")
+  candidateSkills     String @default("[]")
+  candidateHighlights String @default("[]")
+  updatedAt           DateTime @updatedAt
+}
+
+model HrContact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  title     String   @default("")
+  company   String   @default("")
+  status    String   @default("pending")
+  subject   String?
+  body      String?
+  sentAt    DateTime?
+  error     String?
+  messageId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
