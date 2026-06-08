@@ -953,15 +953,27 @@ export default function ColdMailApp() {
                     <CardTitle className="text-sm font-bold text-slate-800 dark:text-slate-200">Company outreach volumes</CardTitle>
                     <CardDescription className="text-muted-foreground">Top companies targeted by target contacts count</CardDescription>
                   </CardHeader>
-                  <CardContent className="h-64">
+                  <CardContent className="h-64 pr-2">
                     {companyBarData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={companyBarData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                          <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                          <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} />
-                          <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} allowDecimals={false} />
-                          <RechartsTooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--foreground)", borderRadius: 8, fontSize: 12 }} />
-                          <Bar dataKey="count" fill="var(--primary)" radius={[4, 4, 0, 0]} maxBarSize={35}>
+                        <BarChart
+                          layout="vertical"
+                          data={companyBarData}
+                          margin={{ top: 5, right: 10, left: -10, bottom: 5 }}
+                        >
+                          <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" horizontal={false} />
+                          <XAxis type="number" stroke="var(--muted-foreground)" fontSize={10} tickLine={false} allowDecimals={false} />
+                          <YAxis
+                            type="category"
+                            dataKey="name"
+                            stroke="var(--muted-foreground)"
+                            fontSize={10}
+                            tickLine={false}
+                            width={85}
+                            tickFormatter={(val) => val.length > 13 ? `${val.substring(0, 11)}...` : val}
+                          />
+                          <RechartsTooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--foreground)", borderRadius: 8, fontSize: 11 }} />
+                          <Bar dataKey="count" fill="var(--primary)" radius={[0, 4, 4, 0]} maxBarSize={18}>
                             {companyBarData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={index === 0 ? "var(--primary)" : "oklch(from var(--primary) l c h / 0.75)"} />
                             ))}
@@ -969,7 +981,7 @@ export default function ColdMailApp() {
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
-                      <div className="h-full flex items-center justify-center text-slate-400 text-xs">
+                      <div className="h-full flex items-center justify-center text-slate-450 text-xs">
                         No company data available. Import contacts first.
                       </div>
                     )}
@@ -1004,8 +1016,8 @@ export default function ColdMailApp() {
                           </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                          <span className="text-2xl font-black text-slate-800 dark:text-white">{sentCount}</span>
-                          <span className="text-[10px] text-emerald-500 dark:text-emerald-400 font-bold uppercase tracking-wider">Sent</span>
+                          <span className="text-2xl font-black text-slate-800 dark:text-white">{totalContacts}</span>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Total</span>
                         </div>
                       </div>
                     ) : (
@@ -1036,7 +1048,7 @@ export default function ColdMailApp() {
                   <CardContent className="h-64 overflow-y-auto pr-1">
                     {recentActivities.length > 0 ? (
                       <div className="space-y-4">
-                        {recentActivities.map((act) => (
+                        {recentActivities.map((act, index) => (
                           <div key={act.id} className="flex gap-3 text-xs leading-normal">
                             <div className="flex flex-col items-center shrink-0">
                               <div
@@ -1056,7 +1068,9 @@ export default function ColdMailApp() {
                                   <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
                                 )}
                               </div>
-                              <div className="w-0.5 flex-1 bg-border/60 min-h-[16px] last:hidden mt-2" />
+                              {index < recentActivities.length - 1 && (
+                                <div className="w-0.5 h-full bg-slate-200 dark:bg-slate-800 min-h-[20px] my-1" />
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2">
