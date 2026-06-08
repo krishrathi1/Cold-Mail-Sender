@@ -84,6 +84,7 @@ import {
   YAxis,
   Tooltip as RechartsTooltip,
   Legend,
+  CartesianGrid,
 } from "recharts";
 
 const ROWS_PER_PAGE = 10;
@@ -578,12 +579,12 @@ export default function ColdMailApp() {
   // Status badge renderer
   const StatusBadge = ({ status }: { status: string }) => {
     const variants: Record<string, { className: string; icon: React.ReactNode }> = {
-      pending: { className: "border-amber-200 text-amber-700 bg-amber-50/60 dark:bg-amber-900/10 dark:text-amber-400", icon: <Clock className="w-3 h-3 mr-1" /> },
-      generating: { className: "border-blue-200 text-blue-700 bg-blue-50/60 dark:bg-blue-900/10 dark:text-blue-400", icon: <Loader2 className="w-3 h-3 mr-1 animate-spin" /> },
-      generated: { className: "border-indigo-200 text-indigo-700 bg-indigo-50/60 dark:bg-indigo-900/10 dark:text-indigo-400", icon: <FileText className="w-3 h-3 mr-1" /> },
-      sending: { className: "border-cyan-200 text-cyan-700 bg-cyan-50/60 dark:bg-cyan-900/10 dark:text-cyan-400", icon: <Loader2 className="w-3 h-3 mr-1 animate-spin" /> },
-      sent: { className: "border-emerald-200 text-emerald-700 bg-emerald-50/60 dark:bg-emerald-900/10 dark:text-emerald-400", icon: <CheckCircle2 className="w-3 h-3 mr-1" /> },
-      failed: { className: "border-red-200 text-red-700 bg-red-50/60 dark:bg-red-900/10 dark:text-red-400", icon: <XCircle className="w-3 h-3 mr-1" /> },
+      pending: { className: "border-amber-500/20 text-amber-400 bg-amber-500/5", icon: <Clock className="w-3 h-3 mr-1" /> },
+      generating: { className: "border-blue-500/20 text-blue-400 bg-blue-500/5", icon: <Loader2 className="w-3 h-3 mr-1 animate-spin" /> },
+      generated: { className: "border-violet-500/20 text-violet-400 bg-violet-500/5", icon: <FileText className="w-3 h-3 mr-1" /> },
+      sending: { className: "border-cyan-500/20 text-cyan-400 bg-cyan-500/5", icon: <Loader2 className="w-3 h-3 mr-1 animate-spin" /> },
+      sent: { className: "border-emerald-500/20 text-emerald-400 bg-emerald-500/5 glow-emerald", icon: <CheckCircle2 className="w-3 h-3 mr-1" /> },
+      failed: { className: "border-red-500/20 text-red-400 bg-red-500/5", icon: <XCircle className="w-3 h-3 mr-1" /> },
     };
     const config = variants[status] || variants.pending;
     return (
@@ -595,31 +596,31 @@ export default function ColdMailApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-tr from-blue-50/40 via-white to-indigo-50/30">
+    <div className="min-h-screen flex flex-col bg-background text-foreground antialiased">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 shadow-md shadow-indigo-100/40 border-b border-indigo-100/20 backdrop-blur-md">
+      <header className="sticky top-0 z-40 bg-card/60 backdrop-blur-md border-b border-border/80 shadow-md shadow-black/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/20 shadow-inner">
-                <Sparkles className="w-5 h-5 text-white animate-pulse" />
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
+                <Sparkles className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
-                  ColdFlow <span className="text-[10px] uppercase font-bold tracking-widest bg-indigo-500 px-1.5 py-0.5 rounded text-white border border-indigo-400/30">PRO</span>
+                <h1 className="text-lg font-black text-white tracking-tight flex items-center gap-1.5">
+                  ColdFlow <span className="text-[10px] uppercase font-bold tracking-widest bg-primary px-1.5 py-0.5 rounded text-white border border-primary/20">AGENT</span>
                 </h1>
-                <p className="text-[10px] text-indigo-100">Autonomous Cold Email Outreach Agent</p>
+                <p className="text-[10px] text-muted-foreground">Autonomous Job Application Pipeline</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/10 backdrop-blur-md text-xs text-white">
-                <Bot className={`w-3.5 h-3.5 ${store.isAgentRunning ? "text-emerald-400 animate-spin" : "text-white/60"}`} />
-                <span className="font-semibold">{store.isAgentRunning ? "Automation Active" : "Automation Idle"}</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/80 border border-border text-xs text-foreground">
+                <Bot className={`w-3.5 h-3.5 ${store.isAgentRunning ? "text-emerald-400 animate-spin" : "text-slate-400"}`} />
+                <span className="font-semibold text-slate-200">{store.isAgentRunning ? "Agent Engine Active" : "Agent Engine Idle"}</span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white hover:bg-white/10 rounded-full w-8 h-8 p-0"
+                className="text-slate-400 hover:text-white hover:bg-secondary rounded-full w-8 h-8 p-0"
                 onClick={loadData}
               >
                 <RefreshCw className="w-4 h-4" />
@@ -632,16 +633,16 @@ export default function ColdMailApp() {
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={store.activeTab} onValueChange={(v) => store.setActiveTab(v as any)} className="space-y-6">
-          <TabsList className="bg-slate-100/80 backdrop-blur-md shadow-inner border border-slate-200/50 rounded-2xl p-1.5 h-auto flex w-fit gap-1">
-            <TabsTrigger value="dashboard" className="rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-5 py-2.5 text-xs font-semibold gap-2 transition-all">
+          <TabsList className="bg-secondary/40 backdrop-blur-md shadow-inner border border-border rounded-xl p-1 h-auto flex w-fit gap-1">
+            <TabsTrigger value="dashboard" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white px-5 py-2 text-xs font-semibold gap-2 transition-all">
               <LayoutDashboard className="w-4 h-4" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger value="automation" className="rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-5 py-2.5 text-xs font-semibold gap-2 transition-all">
+            <TabsTrigger value="automation" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white px-5 py-2 text-xs font-semibold gap-2 transition-all">
               <Terminal className="w-4 h-4" />
               Agent Console
             </TabsTrigger>
-            <TabsTrigger value="settings" className="rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-5 py-2.5 text-xs font-semibold gap-2 transition-all">
+            <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white px-5 py-2 text-xs font-semibold gap-2 transition-all">
               <Cog className="w-4 h-4" />
               Settings
             </TabsTrigger>
@@ -652,81 +653,81 @@ export default function ColdMailApp() {
             {/* Stats Cards Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               <motion.div whileHover={{ y: -3 }} className="h-full">
-                <Card className="border-indigo-100/80 shadow-sm overflow-hidden h-full flex flex-col justify-between">
-                  <div className="h-1 bg-blue-500 w-full" />
+                <Card className="glass-panel glass-panel-hover overflow-hidden h-full flex flex-col justify-between">
+                  <div className="h-0.5 bg-blue-500 w-full" />
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Contacts</p>
-                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Targets</p>
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
                         <Users className="w-4 h-4" />
                       </div>
                     </div>
-                    <h2 className="text-3xl font-extrabold text-slate-900 mt-2">{totalContacts}</h2>
-                    <p className="text-[10px] text-slate-400 mt-1">Recipients in database</p>
+                    <h2 className="text-3xl font-extrabold text-white mt-2">{totalContacts}</h2>
+                    <p className="text-[9px] text-muted-foreground mt-1">Contacts in pipeline</p>
                   </CardContent>
                 </Card>
               </motion.div>
 
               <motion.div whileHover={{ y: -3 }} className="h-full">
-                <Card className="border-emerald-100 shadow-sm overflow-hidden h-full flex flex-col justify-between">
-                  <div className="h-1 bg-emerald-500 w-full" />
+                <Card className="glass-panel glass-panel-hover overflow-hidden h-full flex flex-col justify-between">
+                  <div className="h-0.5 bg-emerald-500 w-full" />
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Emails Sent</p>
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Emails Sent</p>
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
                         <CheckCircle2 className="w-4 h-4" />
                       </div>
                     </div>
-                    <h2 className="text-3xl font-extrabold text-emerald-700 mt-2">{sentCount}</h2>
-                    <p className="text-[10px] text-emerald-500 mt-1">Delivered successfully</p>
+                    <h2 className="text-3xl font-extrabold text-emerald-400 mt-2">{sentCount}</h2>
+                    <p className="text-[9px] text-emerald-500/80 mt-1">Successfully delivered</p>
                   </CardContent>
                 </Card>
               </motion.div>
 
               <motion.div whileHover={{ y: -3 }} className="h-full">
-                <Card className="border-amber-100 shadow-sm overflow-hidden h-full flex flex-col justify-between">
-                  <div className="h-1 bg-amber-500 w-full" />
+                <Card className="glass-panel glass-panel-hover overflow-hidden h-full flex flex-col justify-between">
+                  <div className="h-0.5 bg-amber-500 w-full" />
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pending</p>
-                      <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Pending</p>
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20">
                         <Clock className="w-4 h-4" />
                       </div>
                     </div>
-                    <h2 className="text-3xl font-extrabold text-amber-600 mt-2">{pendingCount}</h2>
-                    <p className="text-[10px] text-amber-500 mt-1">Awaiting AI generation</p>
+                    <h2 className="text-3xl font-extrabold text-amber-400 mt-2">{pendingCount}</h2>
+                    <p className="text-[9px] text-amber-500/80 mt-1">Awaiting dispatch</p>
                   </CardContent>
                 </Card>
               </motion.div>
 
               <motion.div whileHover={{ y: -3 }} className="h-full">
-                <Card className="border-red-100 shadow-sm overflow-hidden h-full flex flex-col justify-between">
-                  <div className="h-1 bg-red-500 w-full" />
+                <Card className="glass-panel glass-panel-hover overflow-hidden h-full flex flex-col justify-between">
+                  <div className="h-0.5 bg-red-500 w-full" />
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Failed</p>
-                      <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-600">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Failed</p>
+                      <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400 border border-red-500/20">
                         <XCircle className="w-4 h-4" />
                       </div>
                     </div>
-                    <h2 className="text-3xl font-extrabold text-red-600 mt-2">{failedCount}</h2>
-                    <p className="text-[10px] text-red-500 mt-1">Errors or blockages</p>
+                    <h2 className="text-3xl font-extrabold text-red-400 mt-2">{failedCount}</h2>
+                    <p className="text-[9px] text-red-500/80 mt-1">Errors encountered</p>
                   </CardContent>
                 </Card>
               </motion.div>
 
               <motion.div whileHover={{ y: -3 }} className="h-full">
-                <Card className="border-indigo-100 shadow-sm overflow-hidden h-full flex flex-col justify-between">
-                  <div className="h-1 bg-indigo-500 w-full" />
+                <Card className="glass-panel glass-panel-hover overflow-hidden h-full flex flex-col justify-between">
+                  <div className="h-0.5 bg-primary w-full" />
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Success Rate</p>
-                      <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Success Rate</p>
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                         <Send className="w-4 h-4" />
                       </div>
                     </div>
-                    <h2 className="text-3xl font-extrabold text-indigo-700 mt-2">{successRate}%</h2>
-                    <p className="text-[10px] text-indigo-500 mt-1">Sent vs Failed ratio</p>
+                    <h2 className="text-3xl font-extrabold text-primary mt-2">{successRate}%</h2>
+                    <p className="text-[9px] text-primary/80 mt-1">Delivery ratio</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -736,21 +737,22 @@ export default function ColdMailApp() {
             {mounted && totalContacts > 0 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Stats charts */}
-                <Card className="border-slate-200/60 shadow-sm col-span-2">
+                <Card className="glass-panel shadow-sm col-span-2">
                   <CardHeader>
-                    <CardTitle className="text-sm font-bold text-slate-800">Company Outreach Target Volume</CardTitle>
-                    <CardDescription>Top companies targeted by number of HR contacts</CardDescription>
+                    <CardTitle className="text-sm font-bold text-slate-200">Company outreach volumes</CardTitle>
+                    <CardDescription className="text-muted-foreground">Top companies targeted by target contacts count</CardDescription>
                   </CardHeader>
                   <CardContent className="h-64">
                     {companyBarData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={companyBarData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" vertical={false} />
                           <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} />
                           <YAxis stroke="#64748b" fontSize={11} tickLine={false} allowDecimals={false} />
-                          <RechartsTooltip contentStyle={{ background: "#1e293b", color: "#f8fafc", borderRadius: 8, fontSize: 12 }} />
-                          <Bar dataKey="count" fill="#4f46e5" radius={[4, 4, 0, 0]} maxBarSize={40}>
+                          <RechartsTooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", color: "#f8fafc", borderRadius: 8, fontSize: 12 }} />
+                          <Bar dataKey="count" fill="oklch(0.58 0.25 270)" radius={[4, 4, 0, 0]} maxBarSize={35}>
                             {companyBarData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={index === 0 ? "#4f46e5" : "#6366f1"} />
+                              <Cell key={`cell-${index}`} fill={index === 0 ? "oklch(0.58 0.25 270)" : "oklch(0.58 0.25 270 / 0.75)"} />
                             ))}
                           </Bar>
                         </BarChart>
@@ -764,10 +766,10 @@ export default function ColdMailApp() {
                 </Card>
 
                 {/* Pie Chart distribution */}
-                <Card className="border-slate-200/60 shadow-sm">
+                <Card className="glass-panel shadow-sm">
                   <CardHeader>
-                    <CardTitle className="text-sm font-bold text-slate-800">Outreach Distribution</CardTitle>
-                    <CardDescription>Visual breakdown of campaign statuses</CardDescription>
+                    <CardTitle className="text-sm font-bold text-slate-200">Outreach Distribution</CardTitle>
+                    <CardDescription className="text-muted-foreground">Breakdown of target statuses</CardDescription>
                   </CardHeader>
                   <CardContent className="h-64 flex flex-col justify-center items-center relative">
                     {chartData.length > 0 ? (
@@ -778,7 +780,7 @@ export default function ColdMailApp() {
                               data={chartData}
                               cx="50%"
                               cy="50%"
-                              innerRadius={50}
+                              innerRadius={52}
                               outerRadius={70}
                               paddingAngle={4}
                               dataKey="value"
@@ -791,12 +793,12 @@ export default function ColdMailApp() {
                           </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                          <span className="text-2xl font-black text-slate-800">{sentCount}</span>
-                          <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">Sent</span>
+                          <span className="text-2xl font-black text-white">{sentCount}</span>
+                          <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Sent</span>
                         </div>
                       </div>
                     ) : (
-                      <div className="h-44 flex items-center justify-center text-slate-400 text-xs">
+                      <div className="h-44 flex items-center justify-center text-slate-500 text-xs">
                         No data available
                       </div>
                     )}
@@ -804,7 +806,7 @@ export default function ColdMailApp() {
                       {chartData.map((d) => (
                         <div key={d.name} className="flex items-center gap-1.5">
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: d.color }} />
-                          <span className="text-slate-600 font-medium text-[11px]">{d.name} ({d.value})</span>
+                          <span className="text-slate-400 font-medium text-[11px]">{d.name} ({d.value})</span>
                         </div>
                       ))}
                     </div>
@@ -814,21 +816,21 @@ export default function ColdMailApp() {
             )}
 
             {/* Contacts Table View */}
-            <Card className="border-indigo-100/80 shadow-md">
-              <CardHeader className="pb-4 border-b border-indigo-50/50">
+            <Card className="glass-panel shadow-md">
+              <CardHeader className="pb-4 border-b border-border/80">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <CardTitle className="text-lg flex items-center gap-2 text-slate-800 font-bold">
-                      <Building className="w-5 h-5 text-indigo-600" />
-                      Candidate Campaign Directory
+                    <CardTitle className="text-lg flex items-center gap-2 text-white font-bold">
+                      <Building className="w-5 h-5 text-primary" />
+                      HR Outreach Directory
                     </CardTitle>
-                    <CardDescription>Select individual or multiple HR contacts to process campaigns</CardDescription>
+                    <CardDescription className="text-muted-foreground">Select individual or multiple contacts to trigger outreach campaigns</CardDescription>
                   </div>
                   <div className="flex items-center flex-wrap gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-semibold"
+                      className="border-border hover:bg-secondary text-slate-200 font-semibold"
                       onClick={() => setAddDialogOpen(true)}
                     >
                       <UserPlus className="w-4 h-4 mr-1.5" />
@@ -837,7 +839,7 @@ export default function ColdMailApp() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-semibold"
+                      className="border-border hover:bg-secondary text-slate-200 font-semibold"
                       onClick={() => csvInputRef.current?.click()}
                     >
                       <Upload className="w-4 h-4 mr-1.5" />
@@ -857,20 +859,20 @@ export default function ColdMailApp() {
                 {/* Search & Filter bar */}
                 <div className="flex flex-col sm:flex-row gap-3 mb-4">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <Input
                       placeholder="Search by name, company, title or email..."
                       value={store.searchQuery}
                       onChange={(e) => store.setSearchQuery(e.target.value)}
-                      className="pl-10 border-indigo-100 focus:border-indigo-300 focus:ring-indigo-200/50"
+                      className="pl-10 border-border focus:border-primary/50 focus:ring-primary/20 bg-secondary/30"
                     />
                   </div>
                   <Select value={store.statusFilter} onValueChange={store.setStatusFilter}>
-                    <SelectTrigger className="w-full sm:w-48 border-indigo-100">
-                      <Filter className="w-4 h-4 mr-2 text-slate-400" />
+                    <SelectTrigger className="w-full sm:w-48 border-border bg-secondary/30">
+                      <Filter className="w-4 h-4 mr-2 text-slate-500" />
                       <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-slate-900 border-border">
                       <SelectItem value="all">All Contacts</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="generating">Generating</SelectItem>
@@ -882,10 +884,10 @@ export default function ColdMailApp() {
                 </div>
 
                 {/* Table details */}
-                <div className="rounded-xl border border-indigo-100/60 overflow-hidden shadow-sm bg-white">
+                <div className="rounded-xl border border-border/80 overflow-hidden shadow-sm bg-secondary/10">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-indigo-50/30 hover:bg-indigo-50/30 border-b border-indigo-100/50">
+                      <TableRow className="bg-secondary/20 hover:bg-secondary/20 border-b border-border/80">
                         <TableHead className="w-12 text-center">
                           <Checkbox
                             checked={
@@ -896,26 +898,26 @@ export default function ColdMailApp() {
                             aria-label="Select all"
                           />
                         </TableHead>
-                        <TableHead className="w-12 text-center text-xs font-bold text-slate-500">#</TableHead>
-                        <TableHead className="text-xs font-bold text-slate-500">Name</TableHead>
-                        <TableHead className="hidden md:table-cell text-xs font-bold text-slate-500">Company</TableHead>
-                        <TableHead className="hidden lg:table-cell text-xs font-bold text-slate-500">Title</TableHead>
-                        <TableHead className="text-xs font-bold text-slate-500">Status</TableHead>
-                        <TableHead className="text-right text-xs font-bold text-slate-500 pr-4">Actions</TableHead>
+                        <TableHead className="w-12 text-center text-xs font-bold text-slate-400">#</TableHead>
+                        <TableHead className="text-xs font-bold text-slate-400">Name</TableHead>
+                        <TableHead className="hidden md:table-cell text-xs font-bold text-slate-400">Company</TableHead>
+                        <TableHead className="hidden lg:table-cell text-xs font-bold text-slate-400">Title</TableHead>
+                        <TableHead className="text-xs font-bold text-slate-400">Status</TableHead>
+                        <TableHead className="text-right text-xs font-bold text-slate-400 pr-4">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {store.isLoading ? (
                         <TableRow>
                           <TableCell colSpan={7} className="text-center py-12">
-                            <Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-600" />
+                            <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
                             <p className="text-xs text-slate-500 mt-2 font-medium">Syncing database data...</p>
                           </TableCell>
                         </TableRow>
                       ) : paginatedContacts.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={7} className="text-center py-12">
-                            <Users className="w-12 h-12 mx-auto text-slate-300" />
+                            <Users className="w-12 h-12 mx-auto text-slate-600" />
                             <p className="text-sm text-slate-500 mt-2 font-medium">
                               {store.searchQuery || store.statusFilter !== "all"
                                 ? "No matching contacts found."
@@ -927,8 +929,8 @@ export default function ColdMailApp() {
                         paginatedContacts.map((contact, index) => (
                           <TableRow
                             key={contact.id}
-                            className={`hover:bg-slate-50/80 transition-colors border-b border-indigo-50/40 ${
-                              selectedContacts.includes(contact.id) ? "bg-indigo-50/10" : ""
+                            className={`hover:bg-secondary/20 transition-colors border-b border-border/80 ${
+                              selectedContacts.includes(contact.id) ? "bg-primary/5" : ""
                             }`}
                           >
                             <TableCell className="text-center">
@@ -938,19 +940,19 @@ export default function ColdMailApp() {
                                 aria-label={`Select ${contact.name}`}
                               />
                             </TableCell>
-                            <TableCell className="text-center text-slate-400 font-mono text-xs">
+                            <TableCell className="text-center text-slate-500 font-mono text-xs">
                               {(safeCurrentPage - 1) * ROWS_PER_PAGE + index + 1}
                             </TableCell>
                             <TableCell>
                               <div>
-                                <p className="font-semibold text-slate-800 text-sm">{contact.name}</p>
-                                <p className="text-xs text-slate-400 font-mono">{contact.email}</p>
+                                <p className="font-semibold text-slate-200 text-sm">{contact.name}</p>
+                                <p className="text-xs text-slate-500 font-mono">{contact.email}</p>
                               </div>
                             </TableCell>
-                            <TableCell className="hidden md:table-cell text-slate-600 font-medium text-sm">
+                            <TableCell className="hidden md:table-cell text-slate-300 font-medium text-sm">
                               {contact.company}
                             </TableCell>
-                            <TableCell className="hidden lg:table-cell text-slate-500 text-xs font-semibold">
+                            <TableCell className="hidden lg:table-cell text-slate-400 text-xs font-semibold">
                               {contact.title}
                             </TableCell>
                             <TableCell>
@@ -962,7 +964,7 @@ export default function ColdMailApp() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 h-8 font-semibold text-xs rounded-lg"
+                                    className="text-primary hover:text-white hover:bg-primary/10 h-8 font-semibold text-xs rounded-lg"
                                     onClick={() => handlePreviewEmail(contact)}
                                   >
                                     <Eye className="w-3.5 h-3.5 mr-1" />
@@ -973,7 +975,7 @@ export default function ColdMailApp() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 h-8 font-semibold text-xs rounded-lg"
+                                    className="text-primary hover:text-white hover:bg-primary/10 h-8 font-semibold text-xs rounded-lg"
                                     onClick={() => {
                                       // Load generated draft into store and open
                                       store.openPreview(contact, contact.subject || "", contact.body || "");
@@ -987,7 +989,7 @@ export default function ColdMailApp() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="text-amber-600 hover:text-amber-800 hover:bg-amber-50 h-8 font-semibold text-xs rounded-lg"
+                                    className="text-amber-500 hover:text-amber-400 hover:bg-amber-500/10 h-8 font-semibold text-xs rounded-lg"
                                     onClick={() => handleResetStatus(contact)}
                                   >
                                     <RotateCcw className="w-3.5 h-3.5 mr-1" />
@@ -996,29 +998,29 @@ export default function ColdMailApp() {
                                 )}
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-slate-100">
-                                      <MoreHorizontal className="w-4 h-4 text-slate-500" />
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-secondary text-slate-400 hover:text-white">
+                                      <MoreHorizontal className="w-4 h-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="w-44">
-                                    <DropdownMenuItem onClick={() => openEditDialog(contact)}>
-                                      <Edit className="w-4 h-4 mr-2 text-slate-500" />
+                                  <DropdownMenuContent align="end" className="w-44 bg-slate-900 border-border">
+                                    <DropdownMenuItem onClick={() => openEditDialog(contact)} className="hover:bg-secondary text-slate-200">
+                                      <Edit className="w-4 h-4 mr-2 text-slate-400" />
                                       Edit Contact
                                     </DropdownMenuItem>
                                     {contact.status !== "pending" && (
-                                      <DropdownMenuItem onClick={() => handleResetStatus(contact)}>
-                                        <RotateCcw className="w-4 h-4 mr-2 text-slate-500" />
+                                      <DropdownMenuItem onClick={() => handleResetStatus(contact)} className="hover:bg-secondary text-slate-200">
+                                        <RotateCcw className="w-4 h-4 mr-2 text-slate-400" />
                                         Reset Status
                                       </DropdownMenuItem>
                                     )}
                                     {contact.status === "pending" && (
-                                      <DropdownMenuItem onClick={() => handlePreviewEmail(contact)}>
-                                        <Sparkles className="w-4 h-4 mr-2 text-indigo-500" />
+                                      <DropdownMenuItem onClick={() => handlePreviewEmail(contact)} className="hover:bg-secondary text-slate-200">
+                                        <Sparkles className="w-4 h-4 mr-2 text-primary" />
                                         AI Generate
                                       </DropdownMenuItem>
                                     )}
                                     <DropdownMenuItem
-                                      className="text-red-600 focus:text-red-700"
+                                      className="text-red-400 hover:bg-red-500/10 focus:text-red-400 focus:bg-red-500/10"
                                       onClick={() => handleDeleteContact(contact)}
                                     >
                                       <Trash2 className="w-4 h-4 mr-2" />
@@ -1037,7 +1039,7 @@ export default function ColdMailApp() {
 
                 {/* Pagination links */}
                 {filteredContacts.length > ROWS_PER_PAGE && (
-                  <div className="flex items-center justify-between mt-4 border-t border-indigo-50/30 pt-3">
+                  <div className="flex items-center justify-between mt-4 border-t border-border/80 pt-3">
                     <p className="text-xs text-slate-500 font-medium">
                       Showing {(safeCurrentPage - 1) * ROWS_PER_PAGE + 1}–
                       {Math.min(safeCurrentPage * ROWS_PER_PAGE, filteredContacts.length)} of{" "}
@@ -1049,12 +1051,12 @@ export default function ColdMailApp() {
                         size="sm"
                         disabled={safeCurrentPage <= 1}
                         onClick={() => store.setCurrentPage(safeCurrentPage - 1)}
-                        className="border-indigo-100 h-8 px-2"
+                        className="border-border h-8 px-2 hover:bg-secondary text-slate-300"
                       >
                         <ChevronLeft className="w-4 h-4" />
                         Previous
                       </Button>
-                      <span className="text-xs font-bold text-slate-600 px-1">
+                      <span className="text-xs font-bold text-slate-300 px-1">
                         {safeCurrentPage} / {totalPages}
                       </span>
                       <Button
@@ -1062,7 +1064,7 @@ export default function ColdMailApp() {
                         size="sm"
                         disabled={safeCurrentPage >= totalPages}
                         onClick={() => store.setCurrentPage(safeCurrentPage + 1)}
-                        className="border-indigo-100 h-8 px-2"
+                        className="border-border h-8 px-2 hover:bg-secondary text-slate-300"
                       >
                         Next
                         <ChevronRight className="w-4 h-4" />
@@ -1080,21 +1082,21 @@ export default function ColdMailApp() {
                   initial={{ opacity: 0, y: 50 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 50 }}
-                  className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 border border-slate-800 shadow-2xl rounded-2xl px-6 py-4 flex items-center justify-between gap-8 backdrop-blur-md max-w-lg w-[calc(100%-2rem)] text-white"
+                  className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 border border-border/80 shadow-2xl rounded-2xl px-6 py-4 flex items-center justify-between gap-8 backdrop-blur-md max-w-lg w-[calc(100%-2rem)] text-white"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="bg-indigo-600 w-7 h-7 rounded-full flex items-center justify-center text-xs font-extrabold shadow-md shadow-indigo-500/20">
+                    <div className="bg-primary w-7 h-7 rounded-full flex items-center justify-center text-xs font-extrabold shadow-md shadow-primary/20">
                       {selectedContacts.length}
                     </div>
                     <div>
-                      <p className="text-xs font-bold">Selected HR Contacts</p>
+                      <p className="text-xs font-bold text-slate-100">Selected HR Contacts</p>
                       <p className="text-[10px] text-slate-400">Perform actions on selections</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
                       size="sm"
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs h-9 px-3.5"
+                      className="bg-primary hover:bg-primary/90 text-white font-bold text-xs h-9 px-3.5"
                       onClick={handleBulkSend}
                       disabled={isBulkProcessing}
                     >
@@ -1113,7 +1115,7 @@ export default function ColdMailApp() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="hover:bg-slate-800 text-slate-300 font-semibold text-xs h-9 px-2"
+                      className="hover:bg-secondary text-slate-300 font-semibold text-xs h-9 px-2"
                       onClick={handleBulkReset}
                       disabled={isBulkProcessing}
                     >
@@ -1122,7 +1124,7 @@ export default function ColdMailApp() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="hover:bg-red-950/40 hover:text-red-400 text-slate-400 font-semibold text-xs h-9 px-2"
+                      className="hover:bg-red-500/10 hover:text-red-400 text-slate-400 font-semibold text-xs h-9 px-2"
                       onClick={handleBulkDelete}
                       disabled={isBulkProcessing}
                     >
@@ -1137,23 +1139,23 @@ export default function ColdMailApp() {
           {/* ============ AUTOMATION TAB ============ */}
           <TabsContent value="automation" className="space-y-6">
             {/* Automation config */}
-            <Card className="border-indigo-100 shadow-sm bg-white">
+            <Card className="glass-panel shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2 text-slate-800 font-bold">
-                  <Zap className="w-5 h-5 text-indigo-600" />
+                <CardTitle className="text-lg flex items-center gap-2 text-white font-bold">
+                  <Zap className="w-5 h-5 text-primary" />
                   Agent Auto-Scheduler
                 </CardTitle>
-                <CardDescription>Configure auto-throttled sending schedules for queueing email operations</CardDescription>
+                <CardDescription className="text-muted-foreground">Configure auto-throttled sending schedules for queueing email operations</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-end">
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Batch Size limit</Label>
+                    <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Batch Size limit</Label>
                     <Select value={batchSize} onValueChange={setBatchSize}>
-                      <SelectTrigger className="w-40 border-indigo-100 focus:ring-indigo-100">
+                      <SelectTrigger className="w-40 border-border bg-secondary/35 text-slate-200">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-slate-900 border-border">
                         <SelectItem value="5">5 emails / batch</SelectItem>
                         <SelectItem value="10">10 emails / batch</SelectItem>
                         <SelectItem value="20">20 emails / batch</SelectItem>
@@ -1162,12 +1164,12 @@ export default function ColdMailApp() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Sleep Interval</Label>
+                    <Label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sleep Interval</Label>
                     <Select value={intervalMinutes} onValueChange={setIntervalMinutes}>
-                      <SelectTrigger className="w-40 border-indigo-100 focus:ring-indigo-100">
+                      <SelectTrigger className="w-40 border-border bg-secondary/35 text-slate-200">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-slate-900 border-border">
                         <SelectItem value="1">1 minute</SelectItem>
                         <SelectItem value="3">3 minutes</SelectItem>
                         <SelectItem value="5">5 minutes</SelectItem>
@@ -1178,7 +1180,7 @@ export default function ColdMailApp() {
                   <div className="flex gap-2 w-full sm:w-auto">
                     {!store.isAgentRunning ? (
                       <Button
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md shadow-indigo-100 flex-1 sm:flex-none"
+                        className="bg-primary hover:bg-primary/95 text-white font-bold shadow-md shadow-primary/20 flex-1 sm:flex-none"
                         onClick={startAgent}
                       >
                         <Play className="w-4 h-4 mr-2" />
@@ -1200,15 +1202,15 @@ export default function ColdMailApp() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="mt-5 p-4 bg-indigo-50/70 border border-indigo-100 rounded-xl flex items-center gap-3.5"
+                    className="mt-5 p-4 bg-primary/5 border border-primary/25 rounded-xl flex items-center gap-3.5"
                   >
                     <div className="relative flex h-3.5 w-3.5 shrink-0">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-pulse-ring"></span>
+                      <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 shadow-inner shadow-black/20"></span>
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-indigo-900">Outreach Agent Engine active</p>
-                      <p className="text-xs text-indigo-600/80 font-medium">
+                      <p className="text-sm font-bold text-slate-200">Outreach Agent Engine active</p>
+                      <p className="text-xs text-slate-400 font-medium">
                         Running campaign queries in batches of {batchSize} every {intervalMinutes} minutes.
                       </p>
                     </div>
@@ -1218,51 +1220,51 @@ export default function ColdMailApp() {
             </Card>
 
             {/* Console Log outputs */}
-            <Card className="border-slate-200/60 shadow-md bg-white">
-              <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
+            <Card className="glass-panel shadow-md">
+              <CardHeader className="pb-3 border-b border-border flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg flex items-center gap-2 text-slate-800 font-bold">
-                    <Terminal className="w-5 h-5 text-indigo-600" />
+                  <CardTitle className="text-lg flex items-center gap-2 text-white font-bold">
+                    <Terminal className="w-5 h-5 text-primary" />
                     Agent Console Log
                   </CardTitle>
-                  <CardDescription>Real-time execution details of background API actions</CardDescription>
+                  <CardDescription className="text-muted-foreground">Real-time execution details of background API actions</CardDescription>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 font-semibold"
+                  className="text-slate-400 hover:text-white hover:bg-secondary font-semibold"
                   onClick={store.clearLogs}
                 >
                   Clear Logs
                 </Button>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="terminal-log bg-slate-950 rounded-2xl overflow-hidden shadow-2xl border border-slate-850">
-                  <div className="flex items-center justify-between px-4 py-3 bg-slate-900/90 border-b border-slate-800">
+                <div className="terminal-log bg-slate-950/70 rounded-2xl overflow-hidden shadow-2xl border border-border">
+                  <div className="flex items-center justify-between px-4 py-3 bg-slate-900/60 border-b border-border">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-red-500/85" />
-                      <div className="w-3 h-3 rounded-full bg-yellow-500/85" />
-                      <div className="w-3 h-3 rounded-full bg-green-500/85" />
+                      <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                      <div className="w-3 h-3 rounded-full bg-green-500/80" />
                       <span className="ml-2 text-xs text-slate-400 font-mono font-bold">outreach_console.log</span>
                     </div>
-                    <Badge variant="outline" className="border-indigo-500/20 text-indigo-400 bg-indigo-500/5 text-[9px] uppercase font-bold py-0.5 tracking-wider">
+                    <Badge variant="outline" className="border-primary/25 text-primary bg-primary/5 text-[9px] uppercase font-bold py-0.5 tracking-wider">
                       Live Stream
                     </Badge>
                   </div>
                   <ScrollArea className="h-96">
-                    <div className="p-5 font-mono text-xs leading-relaxed select-text">
+                    <div className="p-5 font-mono text-xs leading-relaxed select-text bg-slate-950/20">
                       {store.logs.map((log) => (
                         <div
                           key={log.id}
                           className={`mb-2 font-medium break-all border-l-2 pl-3 ${
                             log.type === "system"
-                              ? "text-blue-300 border-blue-500/40"
+                              ? "text-blue-400 border-blue-500/50"
                               : log.type === "success"
-                              ? "text-emerald-400 border-emerald-500/40"
+                              ? "text-emerald-400 border-emerald-500/50"
                               : log.type === "error"
-                              ? "text-red-400 border-red-500/40"
+                              ? "text-red-400 border-red-500/50"
                               : log.type === "warning"
-                              ? "text-amber-400 border-amber-500/40"
+                              ? "text-amber-400 border-amber-500/50"
                               : "text-slate-300 border-slate-500/20"
                           }`}
                         >
@@ -1280,17 +1282,17 @@ export default function ColdMailApp() {
           <TabsContent value="settings" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
               {/* Credentials details */}
-              <Card className="border-indigo-100 shadow-sm bg-white">
+              <Card className="glass-panel shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2 text-slate-800 font-bold">
-                    <Mail className="w-5 h-5 text-indigo-600" />
+                  <CardTitle className="text-lg flex items-center gap-2 text-white font-bold">
+                    <Mail className="w-5 h-5 text-primary" />
                     SMTP Email Credentials
                   </CardTitle>
-                  <CardDescription>Configure your secure Gmail SMTP token settings</CardDescription>
+                  <CardDescription className="text-muted-foreground">Configure your secure Gmail SMTP token settings</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="emailUser" className="text-xs font-bold text-slate-600">Gmail Address</Label>
+                    <Label htmlFor="emailUser" className="text-xs font-bold text-slate-400">Gmail Address</Label>
                     <Input
                       id="emailUser"
                       type="email"
@@ -1300,11 +1302,11 @@ export default function ColdMailApp() {
                         store.config &&
                         store.setConfig({ ...store.config, emailUser: e.target.value })
                       }
-                      className="border-indigo-100 focus:border-indigo-300 focus:ring-indigo-100"
+                      className="border-border focus:border-primary/50 focus:ring-primary/20 bg-secondary/35 text-slate-200"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="emailPass" className="text-xs font-bold text-slate-600">Gmail App Password</Label>
+                    <Label htmlFor="emailPass" className="text-xs font-bold text-slate-400">Gmail App Password</Label>
                     <Input
                       id="emailPass"
                       type="password"
@@ -1314,31 +1316,31 @@ export default function ColdMailApp() {
                         store.config &&
                         store.setConfig({ ...store.config, emailPass: e.target.value })
                       }
-                      className="border-indigo-100 focus:border-indigo-300 focus:ring-indigo-100"
+                      className="border-border focus:border-primary/50 focus:ring-primary/20 bg-secondary/35 text-slate-200"
                     />
-                    <p className="text-[11px] text-slate-500 leading-normal bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-100/30">
-                      <strong>Security tip:</strong> Set up an App Password under your Google Account Security settings. Do not type your normal password.
+                    <p className="text-[11px] text-slate-400 leading-normal bg-secondary/30 p-2.5 rounded-lg border border-border/80">
+                      <strong className="text-slate-300">Security tip:</strong> Set up an App Password under your Google Account Security settings. Do not type your normal password.
                     </p>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Resume attachment */}
-              <Card className="border-indigo-100 shadow-sm bg-white">
+              <Card className="glass-panel shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2 text-slate-800 font-bold">
-                    <FileText className="w-5 h-5 text-indigo-600" />
+                  <CardTitle className="text-lg flex items-center gap-2 text-white font-bold">
+                    <FileText className="w-5 h-5 text-primary" />
                     Resume PDF Attachment
                   </CardTitle>
-                  <CardDescription>Upload your primary PDF resume attached to outgoing emails</CardDescription>
+                  <CardDescription className="text-muted-foreground">Upload your primary PDF resume attached to outgoing emails</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-4 bg-slate-50/60 p-4 border border-slate-200/50 rounded-2xl">
+                  <div className="flex items-center gap-4 bg-secondary/30 p-4 border border-border/85 rounded-xl">
                     <div
                       className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${
                         store.resumeExists
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-600"
-                          : "bg-red-50 border-red-200 text-red-500"
+                          ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400 glow-emerald"
+                          : "bg-red-500/10 border-red-500/25 text-red-400"
                       }`}
                     >
                       {store.resumeExists ? (
@@ -1348,10 +1350,10 @@ export default function ColdMailApp() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-slate-850">
+                      <p className="text-sm font-bold text-slate-200">
                         {store.resumeExists ? "resume.pdf uploaded" : "No Resume Uploaded"}
                       </p>
-                      <p className="text-xs text-slate-400 truncate">
+                      <p className="text-xs text-slate-500 truncate">
                         {store.resumeExists
                           ? "Automatically appended to outreach emails"
                           : "Required for sending cold applications"}
@@ -1360,7 +1362,7 @@ export default function ColdMailApp() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 shrink-0 font-bold"
+                      className="border-border hover:bg-secondary text-slate-350 shrink-0 font-bold"
                       onClick={() => resumeInputRef.current?.click()}
                     >
                       <Upload className="w-4 h-4 mr-1.5" />
@@ -1378,18 +1380,18 @@ export default function ColdMailApp() {
               </Card>
 
               {/* Candidate Info profile */}
-              <Card className="border-indigo-100 shadow-sm bg-white lg:col-span-2">
+              <Card className="glass-panel shadow-md lg:col-span-2">
                 <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2 text-slate-800 font-bold">
-                    <Users className="w-5 h-5 text-indigo-600" />
+                  <CardTitle className="text-lg flex items-center gap-2 text-white font-bold">
+                    <Users className="w-5 h-5 text-primary" />
                     Candidate Context Profile
                   </CardTitle>
-                  <CardDescription>Primary data attributes compiled by AI for cold templates personalization</CardDescription>
+                  <CardDescription className="text-muted-foreground">Primary data attributes compiled by AI for cold templates personalization</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-5">
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div className="space-y-1">
-                      <Label htmlFor="candidateName" className="text-xs font-bold text-slate-600">Full Name</Label>
+                      <Label htmlFor="candidateName" className="text-xs font-bold text-slate-400">Full Name</Label>
                       <Input
                         id="candidateName"
                         placeholder="John Doe"
@@ -1398,11 +1400,11 @@ export default function ColdMailApp() {
                           store.config &&
                           store.setConfig({ ...store.config, candidateName: e.target.value })
                         }
-                        className="border-indigo-100"
+                        className="border-border bg-secondary/35 text-slate-200"
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="candidateEmail" className="text-xs font-bold text-slate-600">Contact Email</Label>
+                      <Label htmlFor="candidateEmail" className="text-xs font-bold text-slate-400">Contact Email</Label>
                       <Input
                         id="candidateEmail"
                         type="email"
@@ -1412,11 +1414,11 @@ export default function ColdMailApp() {
                           store.config &&
                           store.setConfig({ ...store.config, candidateEmail: e.target.value })
                         }
-                        className="border-indigo-100"
+                        className="border-border bg-secondary/35 text-slate-200"
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="candidatePhone" className="text-xs font-bold text-slate-600">Phone number</Label>
+                      <Label htmlFor="candidatePhone" className="text-xs font-bold text-slate-400">Phone number</Label>
                       <Input
                         id="candidatePhone"
                         placeholder="+91 99999 99999"
@@ -1425,11 +1427,11 @@ export default function ColdMailApp() {
                           store.config &&
                           store.setConfig({ ...store.config, candidatePhone: e.target.value })
                         }
-                        className="border-indigo-100"
+                        className="border-border bg-secondary/35 text-slate-200"
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="candidateCollege" className="text-xs font-bold text-slate-600">College Name</Label>
+                      <Label htmlFor="candidateCollege" className="text-xs font-bold text-slate-400">College Name</Label>
                       <Input
                         id="candidateCollege"
                         placeholder="Harvard University"
@@ -1438,11 +1440,11 @@ export default function ColdMailApp() {
                           store.config &&
                           store.setConfig({ ...store.config, candidateCollege: e.target.value })
                         }
-                        className="border-indigo-100"
+                        className="border-border bg-secondary/35 text-slate-200"
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="candidateDegree" className="text-xs font-bold text-slate-600">Degree & Year</Label>
+                      <Label htmlFor="candidateDegree" className="text-xs font-bold text-slate-400">Degree & Year</Label>
                       <Input
                         id="candidateDegree"
                         placeholder="B.Tech CS (4th Year)"
@@ -1451,11 +1453,11 @@ export default function ColdMailApp() {
                           store.config &&
                           store.setConfig({ ...store.config, candidateDegree: e.target.value })
                         }
-                        className="border-indigo-100"
+                        className="border-border bg-secondary/35 text-slate-200"
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="candidateLinkedin" className="text-xs font-bold text-slate-600">LinkedIn handle</Label>
+                      <Label htmlFor="candidateLinkedin" className="text-xs font-bold text-slate-400">LinkedIn handle</Label>
                       <Input
                         id="candidateLinkedin"
                         placeholder="linkedin.com/in/username"
@@ -1464,11 +1466,11 @@ export default function ColdMailApp() {
                           store.config &&
                           store.setConfig({ ...store.config, candidateLinkedin: e.target.value })
                         }
-                        className="border-indigo-100"
+                        className="border-border bg-secondary/35 text-slate-200"
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="candidateGithub" className="text-xs font-bold text-slate-600">GitHub handle</Label>
+                      <Label htmlFor="candidateGithub" className="text-xs font-bold text-slate-400">GitHub handle</Label>
                       <Input
                         id="candidateGithub"
                         placeholder="github.com/username"
@@ -1477,11 +1479,11 @@ export default function ColdMailApp() {
                           store.config &&
                           store.setConfig({ ...store.config, candidateGithub: e.target.value })
                         }
-                        className="border-indigo-100"
+                        className="border-border bg-secondary/35 text-slate-200"
                       />
                     </div>
                     <div className="space-y-1 sm:col-span-2">
-                      <Label htmlFor="candidateSkills" className="text-xs font-bold text-slate-600">Skills list (comma-separated)</Label>
+                      <Label htmlFor="candidateSkills" className="text-xs font-bold text-slate-400">Skills list (comma-separated)</Label>
                       <Input
                         id="candidateSkills"
                         placeholder="React, Next.js, Node.js, AI/ML, Postgres"
@@ -1502,13 +1504,13 @@ export default function ColdMailApp() {
                             });
                           }
                         }}
-                        className="border-indigo-100"
+                        className="border-border bg-secondary/35 text-slate-200"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor="candidateHighlights" className="text-xs font-bold text-slate-600">Achievement highlights (one per line)</Label>
+                    <Label htmlFor="candidateHighlights" className="text-xs font-bold text-slate-400">Achievement highlights (one per line)</Label>
                     <Textarea
                       id="candidateHighlights"
                       placeholder="Highlight 1: Details and statistics...&#10;Highlight 2: Achievements..."
@@ -1530,13 +1532,13 @@ export default function ColdMailApp() {
                           });
                         }
                       }}
-                      className="border-indigo-100"
+                      className="border-border bg-secondary/35 text-slate-205"
                     />
                   </div>
 
                   {/* Custom System Prompt preference */}
                   <div className="space-y-1 pt-2">
-                    <Label htmlFor="customInstructions" className="text-xs font-bold text-indigo-700 flex items-center gap-1.5">
+                    <Label htmlFor="customInstructions" className="text-xs font-bold text-primary flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5" />
                       Custom AI Writing Preferences / Instructions
                     </Label>
@@ -1549,9 +1551,9 @@ export default function ColdMailApp() {
                         store.config &&
                         store.setConfig({ ...store.config, customInstructions: e.target.value })
                       }
-                      className="border-indigo-100/70 focus:border-indigo-300 focus:ring-indigo-100"
+                      className="border-border bg-secondary/35 focus:border-primary/50 focus:ring-primary/10 text-slate-200"
                     />
-                    <p className="text-[10px] text-slate-400 font-medium">
+                    <p className="text-[10px] text-slate-500 font-medium">
                       These instructions will be appended to the AI email generator pipeline to dynamically customize cold templates.
                     </p>
                   </div>
@@ -1562,7 +1564,7 @@ export default function ColdMailApp() {
             {/* Submit button */}
             <div className="flex justify-end pt-2">
               <Button
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-5 shadow-lg shadow-indigo-100 rounded-xl"
+                className="bg-primary hover:bg-primary/90 text-white font-bold px-8 py-5 shadow-lg shadow-primary/20 rounded-xl"
                 onClick={handleSaveSettings}
                 disabled={settingsSaving}
               >
@@ -1584,24 +1586,24 @@ export default function ColdMailApp() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-indigo-50/50 bg-white/90 backdrop-blur-md">
+      <footer className="mt-auto border-t border-border/80 bg-card/45 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
-          <p className="text-xs text-slate-500 font-medium">ColdFlow Engine v0.2 · Made for Outreach Productivity</p>
-          <p className="text-xs text-indigo-600 font-bold">
-            {totalContacts} Target Candidates · {sentCount} Contact Emails Sent
+          <p className="text-xs text-slate-550 font-medium">ColdFlow Engine v0.2.1 · Built for job seeking scaling</p>
+          <p className="text-xs text-primary font-bold">
+            {totalContacts} Outreach targets · {sentCount} Emailed targets
           </p>
         </div>
       </footer>
 
       {/* Email Preview Dialog */}
       <Dialog open={store.isPreviewOpen} onOpenChange={(open) => !open && store.closePreview()}>
-        <DialogContent className="sm:max-w-3xl max-h-[95vh] overflow-y-auto rounded-2xl">
+        <DialogContent className="sm:max-w-3xl max-h-[95vh] overflow-y-auto rounded-2xl bg-slate-900 border-border">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-bold text-slate-800 text-lg">
-              <Mail className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="flex items-center gap-2 font-bold text-white text-lg">
+              <Mail className="w-5 h-5 text-primary" />
               {store.isGenerating ? "AI Generative Agent drafting..." : "Email Draft Review"}
             </DialogTitle>
-            <DialogDescription className="font-semibold text-slate-500">
+            <DialogDescription className="font-semibold text-slate-400">
               {store.previewContact
                 ? `Drafting for ${store.previewContact.name} (${store.previewContact.title}) at ${store.previewContact.company}`
                 : ""}
@@ -1610,29 +1612,29 @@ export default function ColdMailApp() {
 
           <div className="space-y-4 pt-3">
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-slate-600">Subject</Label>
+              <Label className="text-xs font-bold text-slate-400">Subject</Label>
               <Input
                 value={store.previewSubject}
                 onChange={(e) => store.setPreviewSubject(e.target.value)}
                 disabled={store.isGenerating || store.isSending}
-                className="border-indigo-100 focus:border-indigo-300"
+                className="border-border bg-secondary/35 text-slate-200 focus:border-primary/50 focus:ring-primary/10"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-slate-600">Email Body</Label>
+              <Label className="text-xs font-bold text-slate-400">Email Body</Label>
               <Textarea
                 value={store.previewBody}
                 onChange={(e) => store.setPreviewBody(e.target.value)}
                 disabled={store.isGenerating || store.isSending}
                 rows={10}
-                className="border-indigo-100 focus:border-indigo-300 font-mono text-xs leading-relaxed"
+                className="border-border bg-secondary/35 text-slate-200 focus:border-primary/50 focus:ring-primary/10 font-mono text-xs leading-relaxed"
               />
             </div>
 
             {/* AI Refinement Section */}
             {!store.isGenerating && !store.isSending && (
-              <div className="mt-4 p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl space-y-2">
-                <Label className="text-xs font-bold text-indigo-800 flex items-center gap-1">
+              <div className="mt-4 p-3.5 bg-primary/5 border border-primary/25 rounded-xl space-y-2">
+                <Label className="text-xs font-bold text-primary flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5" />
                   Refine this email with AI feedback
                 </Label>
@@ -1642,11 +1644,11 @@ export default function ColdMailApp() {
                     value={aiFeedback}
                     onChange={(e) => setAiFeedback(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleRefineEmail()}
-                    className="border-indigo-100 focus:border-indigo-300 h-9 text-xs"
+                    className="border-border bg-secondary/50 text-slate-200 focus:border-primary/50 focus:ring-primary/10 h-9 text-xs"
                   />
                   <Button
                     size="sm"
-                    className="bg-indigo-650 hover:bg-indigo-700 text-white font-bold h-9 text-xs"
+                    className="bg-primary hover:bg-primary/90 text-white font-bold h-9 text-xs"
                     onClick={handleRefineEmail}
                     disabled={!aiFeedback.trim() || isRefining}
                   >
@@ -1661,17 +1663,17 @@ export default function ColdMailApp() {
             )}
           </div>
 
-          <DialogFooter className="gap-2 pt-4 border-t border-slate-100">
+          <DialogFooter className="gap-2 pt-4 border-t border-border">
             <Button
               variant="outline"
               onClick={store.closePreview}
               disabled={store.isSending}
-              className="border-slate-200"
+              className="border-border hover:bg-secondary text-slate-300"
             >
               Cancel
             </Button>
             <Button
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5"
+              className="bg-primary hover:bg-primary/90 text-white font-bold px-5"
               onClick={handleSendEmail}
               disabled={store.isGenerating || store.isSending}
             >
@@ -1693,60 +1695,60 @@ export default function ColdMailApp() {
 
       {/* Add Contact Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
+        <DialogContent className="sm:max-w-md rounded-2xl bg-slate-900 border-border">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-bold text-slate-800 text-lg">
-              <UserPlus className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="flex items-center gap-2 font-bold text-white text-lg">
+              <UserPlus className="w-5 h-5 text-primary" />
               Add Target Recipient
             </DialogTitle>
-            <DialogDescription className="font-semibold text-slate-500">
+            <DialogDescription className="font-semibold text-slate-400">
               Input the contact details of the HR manager manually
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-3">
             <div className="space-y-1">
-              <Label className="text-xs font-bold text-slate-600">Full Name *</Label>
+              <Label className="text-xs font-bold text-slate-400">Full Name *</Label>
               <Input
                 placeholder="Jane Smith"
                 value={addForm.name}
                 onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
-                className="border-indigo-100"
+                className="border-border bg-secondary/35 text-slate-200"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs font-bold text-slate-600">Email Address *</Label>
+              <Label className="text-xs font-bold text-slate-400">Email Address *</Label>
               <Input
                 type="email"
                 placeholder="jane@company.com"
                 value={addForm.email}
                 onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
-                className="border-indigo-100"
+                className="border-border bg-secondary/35 text-slate-200"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs font-bold text-slate-600">Corporate Title</Label>
+              <Label className="text-xs font-bold text-slate-400">Corporate Title</Label>
               <Input
                 placeholder="Talent Acquisition Partner"
                 value={addForm.title}
                 onChange={(e) => setAddForm({ ...addForm, title: e.target.value })}
-                className="border-indigo-100"
+                className="border-border bg-secondary/35 text-slate-200"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs font-bold text-slate-600">Company Name</Label>
+              <Label className="text-xs font-bold text-slate-400">Company Name</Label>
               <Input
                 placeholder="Acme Corp"
                 value={addForm.company}
                 onChange={(e) => setAddForm({ ...addForm, company: e.target.value })}
-                className="border-indigo-100"
+                className="border-border bg-secondary/35 text-slate-200"
               />
             </div>
           </div>
           <DialogFooter className="pt-2">
-            <Button variant="outline" onClick={() => setAddDialogOpen(false)} className="border-slate-200">
+            <Button variant="outline" onClick={() => setAddDialogOpen(false)} className="border-border hover:bg-secondary text-slate-300">
               Cancel
             </Button>
-            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold" onClick={handleAddContact}>
+            <Button className="bg-primary hover:bg-primary/90 text-white font-bold" onClick={handleAddContact}>
               <Plus className="w-4 h-4 mr-1" />
               Save Contact
             </Button>
@@ -1756,60 +1758,60 @@ export default function ColdMailApp() {
 
       {/* Edit Contact Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
+        <DialogContent className="sm:max-w-md rounded-2xl bg-slate-900 border-border">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-bold text-slate-800 text-lg">
-              <Edit className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="flex items-center gap-2 font-bold text-white text-lg">
+              <Edit className="w-5 h-5 text-primary" />
               Edit HR Contact Details
             </DialogTitle>
-            <DialogDescription className="font-semibold text-slate-500">
+            <DialogDescription className="font-semibold text-slate-400">
               Modify details for this specific outreach campaign target
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-3">
             <div className="space-y-1">
-              <Label className="text-xs font-bold text-slate-600">Full Name *</Label>
+              <Label className="text-xs font-bold text-slate-400">Full Name *</Label>
               <Input
                 placeholder="Jane Smith"
                 value={editForm.name}
                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="border-indigo-100"
+                className="border-border bg-secondary/35 text-slate-200"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs font-bold text-slate-600">Email Address *</Label>
+              <Label className="text-xs font-bold text-slate-400">Email Address *</Label>
               <Input
                 type="email"
                 placeholder="jane@company.com"
                 value={editForm.email}
                 onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                className="border-indigo-100"
+                className="border-border bg-secondary/35 text-slate-200"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs font-bold text-slate-600">Corporate Title</Label>
+              <Label className="text-xs font-bold text-slate-400">Corporate Title</Label>
               <Input
                 placeholder="HR Manager"
                 value={editForm.title}
                 onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                className="border-indigo-100"
+                className="border-border bg-secondary/35 text-slate-200"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs font-bold text-slate-600">Company Name</Label>
+              <Label className="text-xs font-bold text-slate-400">Company Name</Label>
               <Input
                 placeholder="Acme Corp"
                 value={editForm.company}
                 onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
-                className="border-indigo-100"
+                className="border-border bg-secondary/35 text-slate-200"
               />
             </div>
           </div>
           <DialogFooter className="pt-2">
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="border-slate-200">
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="border-border hover:bg-secondary text-slate-300">
               Cancel
             </Button>
-            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold animate-fade-in" onClick={handleEditContact}>
+            <Button className="bg-primary hover:bg-primary/90 text-white font-bold" onClick={handleEditContact}>
               <Check className="w-4 h-4 mr-1.5" />
               Save Changes
             </Button>
