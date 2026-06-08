@@ -13,6 +13,8 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 export const metadata: Metadata = {
   title: "ColdFlow — AI-Powered Cold Email Agent",
   description: "Send personalized cold emails to HR professionals at scale. Powered by AI.",
@@ -31,8 +33,15 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${outfit.variable} antialiased bg-background text-foreground`}
       >
-        {children}
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
