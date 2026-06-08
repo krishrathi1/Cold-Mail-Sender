@@ -35,6 +35,7 @@ export async function POST(request: Request) {
         candidateDegree: body.candidateDegree ?? undefined,
         candidateSkills: body.candidateSkills ?? undefined,
         candidateHighlights: body.candidateHighlights ?? undefined,
+        customInstructions: body.customInstructions ?? undefined,
       },
       create: {
         id: 'default',
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
         candidateDegree: body.candidateDegree ?? '',
         candidateSkills: body.candidateSkills ?? '[]',
         candidateHighlights: body.candidateHighlights ?? '[]',
+        customInstructions: body.customInstructions ?? '',
       },
     });
 

@@ -52,3 +52,12 @@ prompt
 server.log
 # Skills directory
 /skills/
+
+# Local configuration, logs, and databases
+config.json
+email_log.json
+hr_list.csv
+/db/*.db
+/db/*.db-journal
+/db/*.db-shm
+/db/*.db-wal

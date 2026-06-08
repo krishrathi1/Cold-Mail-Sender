@@ -53,11 +53,11 @@ export async function uploadCsv(file: File): Promise<{ added: number; total: num
   return res.json();
 }
 
-export async function generateEmail(hrContactId: string): Promise<{ subject: string; body: string }> {
+export async function generateEmail(hrContactId: string, feedback?: string): Promise<{ subject: string; body: string }> {
   const res = await fetch(`${API_BASE}/generate-email`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ hrContactId }),
+    body: JSON.stringify({ hrContactId, feedback }),
   });
   if (!res.ok) {
     const data = await res.json();
@@ -65,6 +65,16 @@ export async function generateEmail(hrContactId: string): Promise<{ subject: str
   }
   const data = await res.json();
   return data.email;
+}
+
+export async function updateContact(id: string, contact: { name?: string; email?: string; title?: string; company?: string }): Promise<HrContact> {
+  const res = await fetch(`${API_BASE}/hr-list/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(contact),
+  });
+  if (!res.ok) throw new Error("Failed to update contact");
+  return res.json();
 }
 
 export async function sendEmail(hrContactId: string, subject: string, body: string): Promise<{ messageId: string }> {

@@ -46,6 +46,25 @@ interface ColdMailState {
   setCurrentPage: (page: number) => void;
 }
 
+const getInitialLogs = (): LogEntry[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem("coldflow_console_logs");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  return [
+    {
+      id: "init",
+      timestamp: new Date().toLocaleTimeString(),
+      message: "System initialized. Ready to process HR contacts.",
+      type: "system",
+    },
+  ];
+};
+
 export const useColdMailStore = create<ColdMailState>((set) => ({
   contacts: [],
   config: null,
@@ -53,14 +72,7 @@ export const useColdMailStore = create<ColdMailState>((set) => ({
   activeTab: "dashboard",
   isLoading: false,
   isAgentRunning: false,
-  logs: [
-    {
-      id: "init",
-      timestamp: new Date().toLocaleTimeString(),
-      message: "System initialized. Ready to process HR contacts.",
-      type: "system",
-    },
-  ],
+  logs: getInitialLogs(),
   previewContact: null,
   previewSubject: "",
   previewBody: "",
@@ -78,8 +90,8 @@ export const useColdMailStore = create<ColdMailState>((set) => ({
   setIsLoading: (isLoading) => set({ isLoading }),
   setIsAgentRunning: (isAgentRunning) => set({ isAgentRunning }),
   addLog: (message, type) =>
-    set((state) => ({
-      logs: [
+    set((state) => {
+      const newLogs = [
         ...state.logs,
         {
           id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -87,19 +99,26 @@ export const useColdMailStore = create<ColdMailState>((set) => ({
           message,
           type,
         },
-      ],
-    })),
-  clearLogs: () =>
-    set({
-      logs: [
-        {
-          id: "clear",
-          timestamp: new Date().toLocaleTimeString(),
-          message: "Console logs cleared.",
-          type: "system" as const,
-        },
-      ],
+      ];
+      try {
+        localStorage.setItem("coldflow_console_logs", JSON.stringify(newLogs));
+      } catch {}
+      return { logs: newLogs };
     }),
+  clearLogs: () => {
+    const clearedLogs = [
+      {
+        id: "clear",
+        timestamp: new Date().toLocaleTimeString(),
+        message: "Console logs cleared.",
+        type: "system" as const,
+      },
+    ];
+    try {
+      localStorage.setItem("coldflow_console_logs", JSON.stringify(clearedLogs));
+    } catch {}
+    set({ logs: clearedLogs });
+  },
   openPreview: (contact, subject, body) =>
     set({
       previewContact: contact,

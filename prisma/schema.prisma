@@ -20,6 +20,7 @@ model AppConfig {
   candidateDegree     String @default("")
   candidateSkills     String @default("[]")
   candidateHighlights String @default("[]")
+  customInstructions  String @default("")
   updatedAt           DateTime @updatedAt
 }
 

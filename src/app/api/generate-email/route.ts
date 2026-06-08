@@ -37,8 +37,11 @@ function parseEmailJson(text: string): { subject: string; body: string } | null 
 }
 
 export async function POST(request: Request) {
+  let hrContactId: string | undefined;
   try {
-    const { hrContactId } = await request.json();
+    const body = await request.json();
+    hrContactId = body.hrContactId;
+    const feedback = body.feedback;
 
     if (!hrContactId) {
       return NextResponse.json(
@@ -85,7 +88,19 @@ export async function POST(request: Request) {
 
     const systemPrompt = `You are a professional cold email writer. You write concise, personalized cold emails for job seekers reaching out to HR professionals. You must return ONLY a valid JSON object with "subject" and "body" fields. No markdown, no explanation, just the JSON.`;
 
-    const userPrompt = `Write a personalized cold email from a candidate to an HR professional.
+    let userPrompt = "";
+
+    // Check if we are refining an existing draft
+    if (feedback && hrContact.subject && hrContact.body) {
+      userPrompt = `You are asked to refine a previously generated cold email draft based on feedback from the candidate.
+
+ORIGINAL DRAFT:
+Subject: ${hrContact.subject}
+Body:
+${hrContact.body}
+
+CANDIDATE FEEDBACK / REFINEMENT INSTRUCTIONS:
+"${feedback}"
 
 CANDIDATE INFO:
 - Name: ${config.candidateName}
@@ -105,6 +120,35 @@ HR RECIPIENT:
 - Company: ${hrContact.company}
 - Email: ${hrContact.email}
 
+${config.customInstructions ? `CANDIDATE WRITING PREFERENCES / INSTRUCTIONS:\n${config.customInstructions}\n` : ''}
+REQUIREMENTS:
+1. Revise the original subject line and email body to incorporate the candidate's feedback.
+2. Keep the email professional, polite, and under 120 words.
+3. Make sure to maintain the key information but adjust the tone or details as requested by the feedback.
+4. Return ONLY a valid JSON object with "subject" and "body" fields.
+5. Return ONLY the JSON object, nothing else.`;
+    } else {
+      userPrompt = `Write a personalized cold email from a candidate to an HR professional.
+
+CANDIDATE INFO:
+- Name: ${config.candidateName}
+- Email: ${config.candidateEmail}
+- Phone: ${config.candidatePhone}
+- LinkedIn: ${config.candidateLinkedin}
+- GitHub: ${config.candidateGithub}
+- College: ${config.candidateCollege}
+- Degree: ${config.candidateDegree}
+- Skills: ${skillsStr}
+- Key Highlights:
+${highlightsStr}
+
+HR RECIPIENT:
+- Name: ${hrContact.name}
+- Title: ${hrContact.title}
+- Company: ${hrContact.company}
+- Email: ${hrContact.email}
+
+${config.customInstructions ? `CANDIDATE WRITING PREFERENCES / INSTRUCTIONS:\n${config.customInstructions}\n` : ''}
 REQUIREMENTS:
 1. Subject line: punchy and professional, reference their company or role
 2. First line must personalize to their company — show you researched them
@@ -115,6 +159,7 @@ REQUIREMENTS:
 7. Return ONLY a valid JSON object with "subject" and "body" fields
 
 Return ONLY the JSON object, nothing else.`;
+    }
 
     const zai = await ZAI.create();
     const completion = await zai.chat.completions.create({
@@ -158,7 +203,6 @@ Return ONLY the JSON object, nothing else.`;
 
     // Try to reset the contact status if possible
     try {
-      const { hrContactId } = await request.json();
       if (hrContactId) {
         await db.hrContact.update({
           where: { id: hrContactId },
