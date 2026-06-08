@@ -92,6 +92,71 @@ import {
 
 const ROWS_PER_PAGE = 10;
 
+function OutreachIllustration({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 200 200"
+      className={className}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="100" cy="100" r="80" className="fill-primary/5 dark:fill-primary/10" />
+      <circle cx="100" cy="100" r="60" className="fill-primary/5 dark:fill-primary/5 animate-pulse" />
+      
+      {/* Head */}
+      <circle cx="100" cy="70" r="16" className="fill-slate-300 dark:fill-slate-600" />
+      
+      {/* Torso */}
+      <path
+        d="M70 140 C70 110 82 96 100 96 C118 96 130 110 130 140 Z"
+        className="fill-primary/45 dark:fill-primary/30"
+      />
+      {/* Suit/Jacket */}
+      <path
+        d="M72 140 C72 115 80 102 96 100 L90 140 Z"
+        className="fill-primary"
+      />
+      <path
+        d="M128 140 C128 115 120 102 104 100 L110 140 Z"
+        className="fill-primary/80"
+      />
+      
+      {/* Laptop */}
+      <path
+        d="M75 142 H125 V146 H75 Z"
+        className="fill-slate-400 dark:fill-slate-500"
+      />
+      <path
+        d="M80 142 L88 120 H112 L120 142 Z"
+        className="fill-slate-300 dark:fill-slate-400"
+        opacity="0.9"
+      />
+      <rect x="92" y="125" width="16" height="12" rx="1" className="fill-primary/10" />
+      <path d="M96 132 L100 128 L104 132" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      
+      {/* Floating Envelopes */}
+      <g className="animate-bounce" style={{ animationDuration: '3s' }}>
+        <rect x="35" y="48" width="28" height="18" rx="2" className="fill-emerald-500/80 dark:fill-emerald-500/60" />
+        <path d="M35 48 L49 58 L63 48" className="stroke-white dark:stroke-slate-900" strokeWidth="1.5" />
+      </g>
+      
+      <g className="animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }}>
+        <rect x="135" y="65" width="30" height="20" rx="2" className="fill-primary dark:fill-primary/70" />
+        <path d="M135 65 L150 76 L165 65" className="stroke-white dark:stroke-slate-900" strokeWidth="1.5" />
+      </g>
+      
+      <g className="animate-bounce" style={{ animationDuration: '3.5s', animationDelay: '0.5s' }}>
+        <rect x="120" y="30" width="24" height="16" rx="2" className="fill-amber-500/80 dark:fill-amber-500/60" />
+        <path d="M120 30 L132 39 L144 30" className="stroke-white dark:stroke-slate-900" strokeWidth="1.5" />
+      </g>
+      
+      {/* Sparkles */}
+      <path d="M25 105 L27 98 L34 96 L27 94 L25 87 L23 94 L16 96 L23 98 Z" className="fill-amber-400" />
+      <path d="M165 115 L167 110 L172 109 L167 108 L165 103 L163 108 L158 109 L163 110 Z" className="fill-primary animate-pulse" />
+    </svg>
+  );
+}
+
 export default function ColdMailApp() {
   const { toast } = useToast();
   const store = useColdMailStore();
@@ -670,6 +735,45 @@ export default function ColdMailApp() {
 
           {/* ============ DASHBOARD TAB ============ */}
           <TabsContent value="dashboard" className="space-y-6">
+            {/* Onboarding Welcome Panel if empty */}
+            {totalContacts === 0 && (
+              <Card className="glass-panel overflow-hidden border-primary/20 bg-gradient-to-r from-primary/5 via-transparent to-transparent shadow-sm">
+                <CardContent className="p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
+                  <div className="space-y-4 text-center md:text-left max-w-lg">
+                    <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 px-3 py-1 font-bold">
+                      🚀 Get Started
+                    </Badge>
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                      Supercharge Your Outreach
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                      Start your automated cold email campaign by uploading a spreadsheet of HR contacts. The autonomous agent will research their companies and draft highly personalized outreach templates using Gemini AI.
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
+                      <Button
+                        className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg shadow-primary/25"
+                        onClick={() => csvInputRef.current?.click()}
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Import CSV / Excel
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="border-border hover:bg-secondary text-slate-650 dark:text-slate-350 font-bold rounded-xl"
+                        onClick={() => setAddDialogOpen(true)}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Manually
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 shrink-0 flex items-center justify-center">
+                    <OutreachIllustration className="w-full h-full" />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Stats Cards Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               <motion.div whileHover={{ y: -3 }} className="h-full">
@@ -936,12 +1040,19 @@ export default function ColdMailApp() {
                         </TableRow>
                       ) : paginatedContacts.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={7} className="text-center py-12">
-                            <Users className="w-12 h-12 mx-auto text-slate-450 dark:text-slate-600" />
-                            <p className="text-sm text-slate-500 mt-2 font-medium">
+                          <TableCell colSpan={7} className="text-center py-16">
+                            <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center">
+                              <OutreachIllustration className="w-full h-full text-slate-400" />
+                            </div>
+                            <p className="text-sm font-bold text-slate-750 dark:text-slate-300">
                               {store.searchQuery || store.statusFilter !== "all"
-                                ? "No matching contacts found."
-                                : "No HR contacts in list. Add contacts manually or upload a CSV."}
+                                ? "No matching contacts found"
+                                : "Your directory is empty"}
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 max-w-sm mx-auto leading-relaxed font-medium">
+                              {store.searchQuery || store.statusFilter !== "all"
+                                ? "Try refining your search text or clearing the filters to see all contacts."
+                                : "Import a CSV or Excel file containing your HR target list, or add one manually to start."}
                             </p>
                           </TableCell>
                         </TableRow>
