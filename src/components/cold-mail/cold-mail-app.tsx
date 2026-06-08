@@ -223,12 +223,14 @@ export default function ColdMailApp() {
         toast({
           title: "New replies detected!",
           description: `${res.replied} candidate replies tracked and updated to 'replied' status.`,
+          variant: "success",
         });
         await refreshContacts();
       } else {
         toast({
           title: "Check replies complete",
           description: "No new replies detected from sent contacts.",
+          variant: "success",
         });
       }
     } catch (e: any) {
@@ -368,7 +370,7 @@ export default function ColdMailApp() {
       store.setPreviewBody(email.body);
       setAiFeedback("");
       store.addLog(`Draft refined successfully based on your feedback.`, "success");
-      toast({ title: "Draft refined", description: "AI updated the email according to your instructions." });
+      toast({ title: "Draft refined", description: "AI updated the email according to your instructions.", variant: "success" });
     } catch (e: any) {
       store.addLog(`Failed to refine draft: ${e.message}`, "error");
       toast({ title: "Refinement failed", description: e.message, variant: "destructive" });
@@ -394,7 +396,7 @@ export default function ColdMailApp() {
       store.addLog(`Email sent to ${contactName}!`, "success");
       store.closePreview();
       await refreshContacts();
-      toast({ title: "Email sent successfully!", description: `Email delivered to ${contactName}` });
+      toast({ title: "Email sent successfully!", description: `Email delivered to ${contactName}`, variant: "success" });
     } catch (e: any) {
       store.addLog(`Failed to send email: ${e.message}`, "error");
       toast({ title: "Failed to send email", description: e.message, variant: "destructive" });
@@ -409,7 +411,7 @@ export default function ColdMailApp() {
       await api.resetStatus(contact.id);
       store.addLog(`Status reset for ${contact.email}.`, "info");
       await refreshContacts();
-      toast({ title: "Status reset", description: `${contact.name} is now pending.` });
+      toast({ title: "Status reset", description: `${contact.name} is now pending.`, variant: "success" });
     } catch (e: any) {
       store.addLog(`Reset failed: ${e.message}`, "error");
     }
@@ -422,7 +424,7 @@ export default function ColdMailApp() {
       setSelectedContacts((prev) => prev.filter((id) => id !== contact.id));
       store.addLog(`Deleted contact: ${contact.name} (${contact.email}).`, "info");
       await refreshContacts();
-      toast({ title: "Contact deleted", description: `${contact.name} removed from list.` });
+      toast({ title: "Contact deleted", description: `${contact.name} removed from list.`, variant: "success" });
     } catch (e: any) {
       store.addLog(`Delete failed: ${e.message}`, "error");
       toast({ title: "Failed to delete", description: e.message, variant: "destructive" });
@@ -441,7 +443,7 @@ export default function ColdMailApp() {
       setAddDialogOpen(false);
       setAddForm({ name: "", email: "", title: "", company: "" });
       await refreshContacts();
-      toast({ title: "Contact added", description: `${addForm.name} added to the list.` });
+      toast({ title: "Contact added", description: `${addForm.name} added to the list.`, variant: "success" });
     } catch (e: any) {
       store.addLog(`Failed to add contact: ${e.message}`, "error");
       toast({ title: "Failed to add contact", description: e.message, variant: "destructive" });
@@ -476,7 +478,7 @@ export default function ColdMailApp() {
       store.addLog(`Updated contact: ${editForm.name} (${editForm.email}).`, "success");
       setEditDialogOpen(false);
       await refreshContacts();
-      toast({ title: "Contact updated", description: `${editForm.name} updated successfully.` });
+      toast({ title: "Contact updated", description: `${editForm.name} updated successfully.`, variant: "success" });
     } catch (e: any) {
       store.addLog(`Failed to update contact: ${e.message}`, "error");
       toast({ title: "Failed to update", description: e.message, variant: "destructive" });
@@ -493,7 +495,7 @@ export default function ColdMailApp() {
       const result = await api.uploadCsv(file);
       store.addLog(`${fileType} uploaded: ${result.added} contacts added out of ${result.total} total rows.`, "success");
       await refreshContacts();
-      toast({ title: `${fileType} uploaded`, description: `${result.added} contacts added successfully.` });
+      toast({ title: `${fileType} uploaded`, description: `${result.added} contacts added successfully.`, variant: "success" });
     } catch (e: any) {
       store.addLog(`${fileType} upload failed: ${e.message}`, "error");
       toast({ title: "Upload failed", description: e.message, variant: "destructive" });
@@ -509,7 +511,7 @@ export default function ColdMailApp() {
       await api.uploadResume(file);
       store.setResumeExists(true);
       store.addLog("Resume PDF uploaded successfully.", "success");
-      toast({ title: "Resume uploaded", description: "Your resume is now attached to outgoing emails." });
+      toast({ title: "Resume uploaded", description: "Your resume is now attached to outgoing emails.", variant: "success" });
     } catch (e: any) {
       store.addLog(`Resume upload failed: ${e.message}`, "error");
       toast({ title: "Upload failed", description: e.message, variant: "destructive" });
@@ -525,7 +527,7 @@ export default function ColdMailApp() {
       const saved = await api.saveConfig(store.config);
       store.setConfig(saved);
       store.addLog("Settings saved successfully.", "success");
-      toast({ title: "Settings saved", description: "Your configuration has been updated." });
+      toast({ title: "Settings saved", description: "Your configuration has been updated.", variant: "success" });
     } catch (e: any) {
       store.addLog(`Failed to save settings: ${e.message}`, "error");
       toast({ title: "Save failed", description: e.message, variant: "destructive" });
@@ -561,7 +563,8 @@ export default function ColdMailApp() {
       store.addLog("SMTP Connection verified successfully!", "success");
       toast({
         title: "Connection Success",
-        description: "Your Gmail SMTP credentials are valid and active!"
+        description: "Your Gmail SMTP credentials are valid and active!",
+        variant: "success",
       });
     } catch (e: any) {
       store.addLog(`SMTP Connection test failed: ${e.message}`, "error");
@@ -600,7 +603,8 @@ export default function ColdMailApp() {
       store.addLog(`Test email successfully sent. Message ID: ${result.messageId}`, "success");
       toast({
         title: "Test email sent!",
-        description: `Successfully dispatched to ${store.config.candidateEmail || store.config.emailUser}.`
+        description: `Successfully dispatched to ${store.config.candidateEmail || store.config.emailUser}.`,
+        variant: "success",
       });
     } catch (e: any) {
       store.addLog(`Failed to send test email: ${e.message}`, "error");
@@ -732,6 +736,7 @@ export default function ColdMailApp() {
     toast({
       title: "Bulk outreach finished",
       description: `Completed processing ${pendingToProcess.length} contacts. See console for details.`,
+      variant: "success",
     });
   };
 
@@ -746,7 +751,7 @@ export default function ColdMailApp() {
       setSelectedContacts([]);
       await refreshContacts();
       store.addLog(`Bulk reset completed. ${count} contacts reset to pending.`, "info");
-      toast({ title: "Bulk status reset", description: `Successfully reset ${count} contacts.` });
+      toast({ title: "Bulk status reset", description: `Successfully reset ${count} contacts.`, variant: "success" });
     } catch (e: any) {
       store.addLog(`Bulk reset failed: ${e.message}`, "error");
     }
@@ -765,7 +770,7 @@ export default function ColdMailApp() {
       setSelectedContacts([]);
       await refreshContacts();
       store.addLog(`Bulk delete completed. ${count} contacts removed.`, "warning");
-      toast({ title: "Bulk delete success", description: `Removed ${count} contacts.` });
+      toast({ title: "Bulk delete success", description: `Removed ${count} contacts.`, variant: "success" });
     } catch (e: any) {
       store.addLog(`Bulk delete failed: ${e.message}`, "error");
     }
