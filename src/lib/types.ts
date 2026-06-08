@@ -18,6 +18,7 @@ export interface AppConfig {
   id: string;
   emailUser: string;
   emailPass: string;
+  geminiApiKey: string;
   candidateName: string;
   candidateEmail: string;
   candidatePhone: string;

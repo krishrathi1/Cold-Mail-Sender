@@ -1,6 +1,25 @@
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
-import ZAI from 'z-ai-web-dev-sdk';
+import fs from 'fs';
+import path from 'path';
+
+function getGeminiApiKey(): string | null {
+  if (process.env.GEMINI_API_KEY) {
+    return process.env.GEMINI_API_KEY;
+  }
+  try {
+    const configPath = path.join(process.cwd(), 'config.json');
+    if (fs.existsSync(configPath)) {
+      const configData = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      if (configData.geminiApiKey) {
+        return configData.geminiApiKey;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to read config.json:', err);
+  }
+  return null;
+}
 
 function parseEmailJson(text: string): { subject: string; body: string } | null {
   // Try direct JSON parse first
@@ -86,13 +105,19 @@ export async function POST(request: Request) {
     const skillsStr = skills.length > 0 ? skills.join(', ') : 'Not specified';
     const highlightsStr = highlights.length > 0 ? highlights.map((h, i) => `${i + 1}. ${h}`).join('\n') : 'Not specified';
 
-    const systemPrompt = `You are a professional cold email writer. You write concise, personalized cold emails for job seekers reaching out to HR professionals. You must return ONLY a valid JSON object with "subject" and "body" fields. No markdown, no explanation, just the JSON.`;
+    const systemPrompt = `You are a professional cold email writer. You write highly personalized cold emails for job seekers reaching out to HR professionals.
+Your goal is to write a tailored email for a specific company. You must:
+1. Research or infer what the company does, its domain, or a key interest related to the company.
+2. Write a clear, professional sentence or phrase showing you know what the company does or expressing genuine interest in their space.
+3. Align the candidate's achievements and background directly to the company's work or industry domain.
+4. Keep the email concise, natural, and under 120 words.
+5. Return ONLY a valid JSON object with "subject" and "body" fields. No markdown outside of the JSON block, no explanation, just the JSON object itself.`;
 
     let userPrompt = "";
 
     // Check if we are refining an existing draft
     if (feedback && hrContact.subject && hrContact.body) {
-      userPrompt = `You are asked to refine a previously generated cold email draft based on feedback from the candidate.
+      userPrompt = `You are asked to refine a previously generated cold email draft based on feedback from the candidate. Make sure the email remains personalized and details what the company (${hrContact.company}) does, relating it to the candidate's achievements/skills.
 
 ORIGINAL DRAFT:
 Subject: ${hrContact.subject}
@@ -125,10 +150,14 @@ REQUIREMENTS:
 1. Revise the original subject line and email body to incorporate the candidate's feedback.
 2. Keep the email professional, polite, and under 120 words.
 3. Make sure to maintain the key information but adjust the tone or details as requested by the feedback.
-4. Return ONLY a valid JSON object with "subject" and "body" fields.
-5. Return ONLY the JSON object, nothing else.`;
+4. Keep the company relevance and candidate-relationship connection.
+5. Return ONLY a valid JSON object with "subject" and "body" fields.
+
+Return ONLY the JSON object, nothing else.`;
     } else {
       userPrompt = `Write a personalized cold email from a candidate to an HR professional.
+You must research or infer details about the target company (${hrContact.company}) based on its name and industry, and write a professional line about what they do or a recent trend in their domain.
+Then, write something relating the candidate's achievements/skills directly to their business, products, or technology stack.
 
 CANDIDATE INFO:
 - Name: ${config.candidateName}
@@ -151,7 +180,7 @@ HR RECIPIENT:
 ${config.customInstructions ? `CANDIDATE WRITING PREFERENCES / INSTRUCTIONS:\n${config.customInstructions}\n` : ''}
 REQUIREMENTS:
 1. Subject line: punchy and professional, reference their company or role
-2. First line must personalize to their company — show you researched them
+2. First line must personalize to their company — show you know what ${hrContact.company} does or express a specific interest in their space. Mention something related to the company's domain or tech stack, and relate the candidate's highlights to it.
 3. Mention 1-2 key achievements from the candidate highlights
 4. Keep the body under 120 words
 5. End with a polite call-to-action asking for a brief chat
@@ -161,16 +190,49 @@ REQUIREMENTS:
 Return ONLY the JSON object, nothing else.`;
     }
 
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
-      messages: [
-        { role: 'assistant', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      thinking: { type: 'disabled' },
-    });
+    const apiKey = config.geminiApiKey || getGeminiApiKey();
+    if (!apiKey) {
+      await db.hrContact.update({
+        where: { id: hrContactId },
+        data: { status: 'pending', error: 'Gemini API key is not configured' },
+      });
+      return NextResponse.json(
+        { error: 'Gemini API key is not configured. Please add it to your settings or config.json.' },
+        { status: 400 }
+      );
+    }
 
-    const responseText = completion.choices[0]?.message?.content ?? '';
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          },
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: userPrompt }]
+            }
+          ],
+          generationConfig: {
+            responseMimeType: 'application/json'
+          }
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Gemini API returned status ${response.status}: ${errText}`);
+    }
+
+    const data = await response.json();
+    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
     const emailData = parseEmailJson(responseText);
 
     if (!emailData) {
@@ -206,7 +268,7 @@ Return ONLY the JSON object, nothing else.`;
       if (hrContactId) {
         await db.hrContact.update({
           where: { id: hrContactId },
-          data: { status: 'pending', error: 'Email generation failed' },
+          data: { status: 'pending', error: error instanceof Error ? error.message : 'Email generation failed' },
         });
       }
     } catch { /* ignore */ }

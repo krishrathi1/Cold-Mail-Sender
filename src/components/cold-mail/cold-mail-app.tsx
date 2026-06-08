@@ -1306,9 +1306,9 @@ export default function ColdMailApp() {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2 text-slate-800 dark:text-white font-bold">
                     <Mail className="w-5 h-5 text-primary" />
-                    SMTP Email Credentials
+                    Credentials & API Keys
                   </CardTitle>
-                  <CardDescription className="text-muted-foreground">Configure your secure Gmail SMTP token settings</CardDescription>
+                  <CardDescription className="text-muted-foreground">Configure SMTP settings and Gemini API token credentials</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
@@ -1340,6 +1340,26 @@ export default function ColdMailApp() {
                     />
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal bg-secondary/30 p-2.5 rounded-lg border border-border/80">
                       <strong className="text-slate-650 dark:text-slate-305">Security tip:</strong> Set up an App Password under your Google Account Security settings. Do not type your normal password.
+                    </p>
+                  </div>
+                  <div className="space-y-2 pt-2 border-t border-border/50">
+                    <Label htmlFor="geminiApiKey" className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-primary" />
+                      Gemini API Key
+                    </Label>
+                    <Input
+                      id="geminiApiKey"
+                      type="password"
+                      placeholder="AIzaSy..."
+                      value={store.config?.geminiApiKey || ""}
+                      onChange={(e) =>
+                        store.config &&
+                        store.setConfig({ ...store.config, geminiApiKey: e.target.value })
+                      }
+                      className="border-border focus:border-primary/50 focus:ring-primary/20 bg-secondary/35 text-slate-800 dark:text-slate-200"
+                    />
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal bg-secondary/30 p-2.5 rounded-lg border border-border/80">
+                      <strong className="text-slate-650 dark:text-slate-305">Note:</strong> Uses <code>gemini-3-flash-preview</code>. If left blank, it will automatically fall back to the key defined in your root <code>config.json</code> file.
                     </p>
                   </div>
                 </CardContent>

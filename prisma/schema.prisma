@@ -11,6 +11,7 @@ model AppConfig {
   id                  String @id @default("default")
   emailUser           String @default("")
   emailPass           String @default("")
+  geminiApiKey        String @default("")
   candidateName       String @default("")
   candidateEmail      String @default("")
   candidatePhone      String @default("")

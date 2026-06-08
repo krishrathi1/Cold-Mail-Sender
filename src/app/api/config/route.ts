@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       update: {
         emailUser: body.emailUser ?? undefined,
         emailPass: body.emailPass ?? undefined,
+        geminiApiKey: body.geminiApiKey ?? undefined,
         candidateName: body.candidateName ?? undefined,
         candidateEmail: body.candidateEmail ?? undefined,
         candidatePhone: body.candidatePhone ?? undefined,
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
         id: 'default',
         emailUser: body.emailUser ?? '',
         emailPass: body.emailPass ?? '',
+        geminiApiKey: body.geminiApiKey ?? '',
         candidateName: body.candidateName ?? '',
         candidateEmail: body.candidateEmail ?? '',
         candidatePhone: body.candidatePhone ?? '',
