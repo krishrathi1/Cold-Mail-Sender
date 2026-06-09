@@ -184,6 +184,7 @@ export default function ColdMailApp() {
   const [aiFeedback, setAiFeedback] = useState("");
   const [isRefining, setIsRefining] = useState(false);
   const [isCheckingReplies, setIsCheckingReplies] = useState(false);
+  const [viewSentContact, setViewSentContact] = useState<HrContact | null>(null);
 
   // SSR protection for Recharts
   const [mounted, setMounted] = useState(false);
@@ -1387,6 +1388,17 @@ export default function ColdMailApp() {
                                     <span>Follow-up</span>
                                   </Button>
                                 )}
+                                {contact.status === "sent" && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-primary hover:text-primary-foreground hover:bg-primary h-8 font-semibold text-xs rounded-lg border border-primary/10"
+                                    onClick={() => setViewSentContact(contact)}
+                                  >
+                                    <Eye className="w-3.5 h-3.5 mr-1" />
+                                    <span>View Sent</span>
+                                  </Button>
+                                )}
                                 {(contact.status === "sent" || contact.status === "failed") && (
                                   <Button
                                     variant="ghost"
@@ -1409,6 +1421,12 @@ export default function ColdMailApp() {
                                       <Edit className="w-4 h-4 mr-2 text-slate-400" />
                                       Edit Contact
                                     </DropdownMenuItem>
+                                    {(contact.status === "sent" || contact.status === "replied") && (
+                                      <DropdownMenuItem onClick={() => setViewSentContact(contact)} className="hover:bg-secondary text-foreground">
+                                        <Eye className="w-4 h-4 mr-2 text-slate-400" />
+                                        View Sent Email
+                                      </DropdownMenuItem>
+                                    )}
                                     {contact.status !== "pending" && (
                                       <DropdownMenuItem onClick={() => handleResetStatus(contact)} className="hover:bg-secondary text-foreground">
                                         <RotateCcw className="w-4 h-4 mr-2 text-slate-400" />
@@ -2085,6 +2103,30 @@ export default function ColdMailApp() {
                 </div>
               </div>
             )}
+            {store.previewContact && (store.previewContact.status === "sent" || store.previewContact.status === "replied") && store.previewContact.body && (
+              <div className="border border-border bg-secondary/15 dark:bg-secondary/10 rounded-xl p-3.5 space-y-1">
+                <details className="group">
+                  <summary className="flex items-center justify-between cursor-pointer list-none text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+                    <div className="flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5 text-slate-400" />
+                      <span>View Sent Outreach Email</span>
+                    </div>
+                    <span className="transition-transform duration-200 group-open:rotate-180">
+                      <ChevronRight className="w-3 h-3" />
+                    </span>
+                  </summary>
+                  <div className="mt-3 space-y-2 pt-2 border-t border-border/40">
+                    <p className="text-xs font-semibold text-slate-750 dark:text-slate-250">
+                      <span className="text-slate-450 dark:text-slate-500 font-normal">Subject: </span>
+                      {store.previewContact.subject}
+                    </p>
+                    <div className="bg-card border border-border/80 rounded-lg p-3 max-h-36 overflow-y-auto text-[11px] leading-relaxed text-slate-600 dark:text-slate-350 whitespace-pre-wrap font-mono">
+                      {store.previewContact.body}
+                    </div>
+                  </div>
+                </details>
+              </div>
+            )}
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-slate-500 dark:text-slate-400">Subject</Label>
               <Input
@@ -2306,6 +2348,81 @@ export default function ColdMailApp() {
             <Button className="bg-primary hover:bg-primary/90 text-white font-bold" onClick={handleEditContact}>
               <Check className="w-4 h-4 mr-1.5" />
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sent Email Details Dialog */}
+      <Dialog open={viewSentContact !== null} onOpenChange={(open) => !open && setViewSentContact(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-lg">
+              <Mail className="w-5 h-5 text-emerald-500" />
+              Sent Outreach Details
+            </DialogTitle>
+            <DialogDescription className="font-semibold text-slate-450 dark:text-slate-400">
+              {viewSentContact
+                ? `Outreach sent to ${viewSentContact.name} (${viewSentContact.title}) at ${viewSentContact.company}`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          {viewSentContact && (
+            <div className="space-y-4 pt-3 text-sm">
+              <div className="bg-secondary/30 border border-border rounded-xl p-4 space-y-2">
+                <div className="grid grid-cols-2 gap-y-2 text-xs">
+                  <div>
+                    <span className="text-slate-400 font-medium block">Sent To</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{viewSentContact.name} ({viewSentContact.email})</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-medium block">Sent At</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">
+                      {viewSentContact.sentAt ? new Date(viewSentContact.sentAt).toLocaleString() : "N/A"}
+                    </span>
+                  </div>
+                  <div className="col-span-2 border-t border-border/40 pt-2">
+                    <span className="text-slate-400 font-medium block">Subject</span>
+                    <span className="font-bold text-slate-900 dark:text-white">{viewSentContact.subject || "No Subject"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-slate-500 dark:text-slate-400">Email Body</Label>
+                <div className="bg-secondary/35 border border-border rounded-xl p-4 text-xs leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-mono max-h-80 overflow-y-auto">
+                  {viewSentContact.body}
+                </div>
+              </div>
+
+              {viewSentContact.replyBody && (
+                <div className="border border-indigo-500/20 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-xl p-4 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-indigo-650 dark:text-indigo-400 font-bold text-xs">
+                      <Reply className="w-3.5 h-3.5" />
+                      <span>Received HR Reply</span>
+                    </div>
+                    {viewSentContact.repliedAt && (
+                      <span className="text-[10px] text-indigo-650/80 dark:text-indigo-400/80 font-mono font-semibold">
+                        {new Date(viewSentContact.repliedAt).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="bg-card border border-indigo-500/10 rounded-lg p-3 max-h-40 overflow-y-auto text-xs leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans">
+                    {viewSentContact.replyBody}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="pt-2 border-t border-border">
+            <Button
+              className="bg-primary hover:bg-primary/95 text-white font-bold px-6"
+              onClick={() => setViewSentContact(null)}
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
