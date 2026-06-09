@@ -432,6 +432,36 @@ export default function ColdMailApp() {
     }
   };
 
+  // Delete whole dataset
+  const handleDeleteAllContacts = async () => {
+    if (!confirm("Are you sure you want to delete the whole dataset? This action will permanently remove all contacts and cannot be undone.")) {
+      return;
+    }
+    
+    store.setIsLoading(true);
+    store.addLog("Deleting entire dataset...", "warning");
+    try {
+      await api.deleteAllContacts();
+      setSelectedContacts([]);
+      store.addLog("Whole dataset deleted successfully.", "success");
+      await refreshContacts();
+      toast({
+        title: "Dataset deleted",
+        description: "The whole dataset has been successfully removed.",
+        variant: "success",
+      });
+    } catch (e: any) {
+      store.addLog(`Failed to delete entire dataset: ${e.message}`, "error");
+      toast({
+        title: "Deletion failed",
+        description: e.message,
+        variant: "destructive",
+      });
+    } finally {
+      store.setIsLoading(false);
+    }
+  };
+
   // Add contact
   const handleAddContact = async () => {
     if (!addForm.name || !addForm.email) {
@@ -1238,6 +1268,16 @@ export default function ColdMailApp() {
                     >
                       <Upload className="w-4 h-4 mr-1.5" />
                       Import CSV / Excel
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-red-500/20 text-red-500 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400 dark:border-red-500/30 dark:hover:bg-red-500/20 font-semibold"
+                      onClick={handleDeleteAllContacts}
+                      disabled={totalContacts === 0}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1.5" />
+                      Delete Whole Dataset
                     </Button>
                     <input
                       ref={csvInputRef}

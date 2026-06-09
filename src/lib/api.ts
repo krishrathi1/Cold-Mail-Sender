@@ -130,3 +130,9 @@ export async function checkReplies(): Promise<{
   return res.json();
 }
 
+export async function deleteAllContacts(): Promise<void> {
+  const res = await fetch(`${API_BASE}/hr-list`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete all contacts");
+}
+
+
