@@ -838,8 +838,18 @@ export default function ColdMailApp() {
                   )}
                 </Button>
               )}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/80 border border-border text-xs text-foreground">
-                <Bot className={`w-3.5 h-3.5 ${store.isAgentRunning ? "text-emerald-400 animate-spin" : "text-slate-400"}`} />
+              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-secondary/80 border border-border text-xs text-foreground">
+                {store.isAgentRunning ? (
+                  <div className="relative flex h-2.5 w-2.5 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-md shadow-emerald-500/50"></span>
+                  </div>
+                ) : (
+                  <div className="relative flex h-2.5 w-2.5 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 shadow-md shadow-red-500/50"></span>
+                  </div>
+                )}
                 <span className="font-semibold text-slate-700 dark:text-slate-200">{store.isAgentRunning ? "Agent Engine Active" : "Agent Engine Idle"}</span>
               </div>
               <Button
