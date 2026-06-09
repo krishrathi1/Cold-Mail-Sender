@@ -46,3 +46,17 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function DELETE() {
+  try {
+    await db.hrContact.deleteMany();
+    return NextResponse.json({ success: true, message: 'All contacts deleted successfully' });
+  } catch (error) {
+    console.error('Failed to delete all HR contacts:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete all HR contacts' },
+      { status: 500 }
+    );
+  }
+}
+
